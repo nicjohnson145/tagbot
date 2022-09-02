@@ -1,16 +1,16 @@
 package main
 
 import (
-	"testing"
+	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/stretchr/testify/require"
-	"time"
 	"io"
 	"os"
 	"strings"
+	"testing"
+	"time"
 )
 
 type testcommit struct {
@@ -33,7 +33,7 @@ func makeTestRepo(t *testing.T, commits ...testcommit) *git.Repository {
 	const fileName = "commit-msg"
 
 	for _, commit := range commits {
-		f, err := fs.OpenFile(fileName, os.O_RDWR | os.O_CREATE | os.O_TRUNC, 0666)
+		f, err := fs.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 		require.NoError(t, err, "opening file in memory")
 
 		_, err = io.Copy(f, strings.NewReader(commit.Msg))
@@ -46,9 +46,9 @@ func makeTestRepo(t *testing.T, commits ...testcommit) *git.Repository {
 
 		_, err = w.Commit(commit.Msg, &git.CommitOptions{
 			Author: &object.Signature{
-				Name: "tagbot",
+				Name:  "tagbot",
 				Email: "tagbot@example.com",
-				When: time.Now(),
+				When:  time.Now(),
 			},
 		})
 		require.NoError(t, err, "commiting file")

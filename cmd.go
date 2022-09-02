@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
+	"github.com/spf13/cobra"
 	"io"
 )
 

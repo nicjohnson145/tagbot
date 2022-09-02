@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/Masterminds/semver"
+	"github.com/apex/log"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/Masterminds/semver"
-	"fmt"
-	"github.com/apex/log"
 	"sort"
 )
 
@@ -51,5 +51,5 @@ func (g *GitRepo) LatestTag() (*semver.Version, error) {
 	}
 
 	sort.Sort(semver.Collection(tags))
-	return tags[len(tags) - 1], nil
+	return tags[len(tags)-1], nil
 }
