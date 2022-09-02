@@ -6,7 +6,7 @@ import (
 )
 
 func TestLatestTag(t *testing.T) {
-	repo := makeTestRepo(
+	repo := newTestRepo(
 		t,
 		testcommit{
 			Msg: "foobar1",
@@ -23,7 +23,7 @@ func TestLatestTag(t *testing.T) {
 	)
 
 	g := GitRepo{
-		repo: repo,
+		repo: repo.Repo,
 	}
 
 	tag, err := g.LatestTag()
@@ -33,30 +33,23 @@ func TestLatestTag(t *testing.T) {
 }
 
 func TestCommitsSinceTag(t *testing.T) {
-	repo := makeTestRepo(
-		t,
-		testcommit{
-			Msg: "foobar1",
-			Tag: "v0.1.0",
-		},
-		testcommit{
-			Msg: "some commit 1",
-		},
-		testcommit{
-			Msg: "some commit 2",
-		},
-	)
+	repo := newTestRepo(t)
+	tagHash := repo.MakeCommit(t, testcommit{
+		Msg: "foobar1",
+		Tag: "v0.1.0",
+	})
+	repo.MakeCommit(t, testcommit{
+		Msg: "some commit 1",
+	})
+	repo.MakeCommit(t, testcommit{
+		Msg: "some commit 2",
+	})
 
 	g := GitRepo{
-		repo: repo,
+		repo: repo.Repo,
 	}
 
-	tag, err := g.LatestTag()
-	require.NoError(t, err)
-	require.NotNil(t, tag)
-	require.Equal(t, "v0.1.0", tag.Tag.Original())
-
-	commitsSince, err := g.CommitsSinceTag(tag)
+	commitsSince, err := g.CommitsSinceHash(&tagHash)
 	require.NoError(t, err)
 	require.Equal(t, []string{"some commit 1", "some commit 2"}, commitsSince)
 }

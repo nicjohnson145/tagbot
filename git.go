@@ -68,7 +68,7 @@ func (g *GitRepo) LatestTag() (*Tag, error) {
 	return &tags[len(tags)-1], nil
 }
 
-func (g *GitRepo) CommitsSinceTag(tag *Tag) ([]string, error) {
+func (g *GitRepo) CommitsSinceHash(hash *plumbing.Hash) ([]string, error) {
 	iter, err := g.repo.Log(&git.LogOptions{
 		Order: git.LogOrderCommitterTime,
 	})
@@ -77,12 +77,12 @@ func (g *GitRepo) CommitsSinceTag(tag *Tag) ([]string, error) {
 	}
 
 	var appendAndContinue func(*object.Commit) bool
-	if tag == nil {
+	if hash == nil {
 		// If we don't get a tag, that just means we consider all commits forever
 		appendAndContinue = func(*object.Commit) bool { return true }
 	} else {
 		// Otherwise we stop once we hit the commit with the same hash as the tag
-		appendAndContinue = func(c *object.Commit) bool { return c.Hash != tag.Hash }
+		appendAndContinue = func(c *object.Commit) bool { return c.Hash != *hash }
 	}
 
 	commits := []string{}
