@@ -1,0 +1,24 @@
+project_name: tagbot
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+archives:
+  - format: binary
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
+    # Per https://goreleaser.com/customization/archive/#packaging-only-the-binaries
+    files:
+      - none*
+changelog:
+  filters:
+    exclude:
+      - '^Merge pull request #'
