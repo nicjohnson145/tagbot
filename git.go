@@ -226,7 +226,7 @@ func (g *GitRepo) sshAuth() (*ssh.PublicKeys, error) {
 	if val := os.Getenv(EnvVarKeyPath); val != "" {
 		path = val
 	} else {
-		p := "~/.ssh/id_rsa.pub"
+		p := "~/.ssh/id_rsa"
 		keyPath, err := homedir.Expand(p)
 		if err != nil {
 			return nil, fmt.Errorf("error expanding path %v: %w", p, err)
