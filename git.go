@@ -16,7 +16,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"strings"
 	"errors"
-	"io/ioutil"
 )
 
 var errStopIteration = errors.New("stop iteration")
@@ -234,29 +233,29 @@ func (g *GitRepo) remoteName() string {
 }
 
 func (g *GitRepo) sshAuth() (*ssh.PublicKeys, error) {
-	var path string
+	paths := []string{
+		"~/.ssh/id_rsa",
+		"~/.ssh/id_ecdsa",
+	}
 	if val := os.Getenv(EnvVarKeyPath); val != "" {
-		path = val
-	} else {
-		p := "~/.ssh/id_rsa"
-		keyPath, err := homedir.Expand(p)
+		paths = []string{val}
+	}
+	for _, p := range paths {
+		path, err := homedir.Expand(p)
 		if err != nil {
-			return nil, fmt.Errorf("error expanding path %v: %w", p, err)
+			return nil, fmt.Errorf("error expanding ~: %w", err)
 		}
-		path = keyPath
+		if _, err := os.Stat(path); err == nil {
+			pubKey, err := ssh.NewPublicKeysFromFile("git", path, "")
+			if err != nil {
+				return nil, fmt.Errorf("error handling public key: %w", err)
+			}
+			return pubKey, nil
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return nil, fmt.Errorf("error checking existance of %v: %w", path, err)
+		}
 	}
-
-	sshKey, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("error reading %v: %w", path, err)
-	}
-
-	pubKey, err := ssh.NewPublicKeys("git", []byte(sshKey), "")
-	if err != nil {
-		return nil, fmt.Errorf("error handling public key: %w", err)
-	}
-
-	return pubKey, nil
+	return nil, fmt.Errorf("no matching keys found, use %v to specify key path", EnvVarKeyPath)
 }
 
 func (g *GitRepo) httpsAuth()  (*http.BasicAuth, error) {
