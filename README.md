@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: TagBot
       uses: nicjohnson145/tagbot@v0.1.0
       id: tagbot
