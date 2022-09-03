@@ -6,5 +6,3 @@ outputs:
 runs:
   using: docker
   image: docker://ghcr.io/nicjohnson145/tagbot:latest
-  args:
-  - "--debug"
