@@ -70,9 +70,21 @@ func (g *GitRepo) LatestTag() (*Tag, error) {
 			return nil
 		}
 
+		var hash plumbing.Hash
+
+		obj, err := g.repo.TagObject(tag.Hash())
+		switch err {
+		case nil:
+			hash = obj.Target
+		case plumbing.ErrObjectNotFound:
+			hash = tag.Hash()
+		default:
+			return err
+		}
+
 		tags = append(tags, Tag{
 			Tag: v,
-			Hash: tag.Hash(),
+			Hash: hash,
 		})
 		return nil
 	})
