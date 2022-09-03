@@ -1,13 +1,29 @@
 package main
 
 import (
-	"github.com/apex/log"
 	"github.com/Masterminds/semver"
+	"github.com/apex/log"
 )
+
+type PathSetter interface {
+	SetPath(string)
+}
 
 type IncrementOpts struct {
 	Path        string
 	AlwaysPatch bool
+}
+
+func (o *IncrementOpts) SetPath(s string) {
+	o.Path = s
+}
+
+type NextOpts struct {
+	Path string
+}
+
+func (o *NextOpts) SetPath(s string) {
+	o.Path = s
 }
 
 func IncrementTag(opts IncrementOpts) error {
@@ -22,11 +38,11 @@ func IncrementTag(opts IncrementOpts) error {
 	}
 
 	if !updated {
-		log.Info("no new tag needed")
+		log.Debug("no new tag needed")
 		return nil
 	}
 
-	log.Infof("creating new tag: %v", version.Original())
+	log.Debugf("creating new tag: %v", version.Original())
 	if err := repo.MakeTagHead(version.Original()); err != nil {
 		return err
 	}
@@ -34,6 +50,24 @@ func IncrementTag(opts IncrementOpts) error {
 		return err
 	}
 
+	return nil
+}
+
+func Next(opts NextOpts) error {
+	repo, err := NewGitRepo(opts.Path)
+	if err != nil {
+		return err
+	}
+	newTag, update, err := getNewTag(repo, opts.Path, false)
+	if err != nil {
+		return err
+	}
+
+	if update {
+		log.Info(newTag.Original())
+	} else {
+		log.Info("up to date")
+	}
 	return nil
 }
 
