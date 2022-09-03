@@ -16,6 +16,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"strings"
 	"errors"
+	"time"
 )
 
 var errStopIteration = errors.New("stop iteration")
@@ -145,7 +146,14 @@ func (g *GitRepo) MakeTagHead(name string) error {
 }
 
 func (g *GitRepo) MakeTag(name string, hash plumbing.Hash) error {
-	_, err := g.repo.CreateTag(name, hash, &git.CreateTagOptions{Message: "created by TagBot"})
+	_, err := g.repo.CreateTag(name, hash, &git.CreateTagOptions{
+		Message: "created by TagBot",
+		Tagger: &object.Signature{
+			Name: "TagBot",
+			Email: "tagbot@example.com",
+			When: time.Now(),
+		},
+	})
 	if err != nil {
 		return fmt.Errorf("error creating tag: %w", err)
 	}

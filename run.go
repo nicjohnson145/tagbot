@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/Masterminds/semver"
 	"github.com/apex/log"
+	"os"
+	"fmt"
 )
 
 type PathSetter interface {
@@ -48,6 +50,10 @@ func IncrementTag(opts IncrementOpts) error {
 	}
 	if err := repo.PushTags(); err != nil {
 		return err
+	}
+
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		fmt.Printf("::set-output name=tag::%v\n", version.Original())
 	}
 
 	return nil
