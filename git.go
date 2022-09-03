@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/samber/lo"
 	"github.com/Masterminds/semver"
-	"github.com/apex/log"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -12,6 +12,9 @@ import (
 )
 
 var errStopIteration = errors.New("stop iteration")
+
+var InitialVersion = lo.Must(semver.NewVersion("v0.0.1"))
+
 
 func NewGitRepo(path string) (*GitRepo, error) {
 	repo, err := git.PlainOpen(path)
@@ -43,7 +46,6 @@ func (g *GitRepo) LatestTag() (*Tag, error) {
 	err = iter.ForEach(func(tag *plumbing.Reference) error {
 		v, err := semver.NewVersion(tag.Name().Short())
 		if err != nil {
-			log.WithField("name", tag.String()).Warn("error parsing as semver, not considering")
 			return nil
 		}
 
@@ -58,7 +60,6 @@ func (g *GitRepo) LatestTag() (*Tag, error) {
 	}
 
 	if len(tags) == 0 {
-		log.Debug("unable to find any valid tags")
 		return nil, nil
 	}
 
