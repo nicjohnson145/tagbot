@@ -9,7 +9,8 @@ when pushing to the default branch
 ```yaml
 on:
   push:
-    branches: [ $default-branch ]
+    branches:
+    - main
 
 jobs:
   build-tag:
