@@ -5,7 +5,9 @@ import (
 	"github.com/samber/lo"
 	"github.com/Masterminds/semver"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"sort"
 	"errors"
@@ -101,6 +103,38 @@ func (g *GitRepo) CommitsSinceHash(hash *plumbing.Hash) ([]string, error) {
 	// Reverse it, so we can iterate in the order things were committed
 	reverseArray(commits)
 	return commits, nil
+}
+
+func (g *GitRepo) MakeTagHead(name string) error {
+	h, err := g.repo.Head()
+	if err != nil {
+		return fmt.Errorf("error getting repo head: %w", err)
+	}
+
+	return g.MakeTag(name, h.Hash())
+}
+
+func (g *GitRepo) MakeTag(name string, hash plumbing.Hash) error {
+	_, err := g.repo.CreateTag(name, hash, &git.CreateTagOptions{Message: "created by TagBot"})
+	if err != nil {
+		return fmt.Errorf("error creating tag: %w", err)
+	}
+	return nil
+}
+
+func (g *GitRepo) PushTags() error {
+	err := g.repo.Push(&git.PushOptions{
+		RemoteName: "origin",
+		RefSpecs: []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
+		Auth: &http.BasicAuth{
+			Username: "TagBot",
+			Password: "",
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("error pushing tags: %w", err)
+	}
+	return nil
 }
 
 func reverseArray[T any](a []T) []T {

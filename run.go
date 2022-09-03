@@ -11,7 +11,12 @@ type IncrementOpts struct {
 }
 
 func IncrementTag(opts IncrementOpts) error {
-	version, updated, err := getNewTag(opts.Path, opts.AlwaysPatch)
+	repo, err := NewGitRepo(opts.Path)
+	if err != nil {
+		return err
+	}
+
+	version, updated, err := getNewTag(repo, opts.Path, opts.AlwaysPatch)
 	if err != nil {
 		return err
 	}
@@ -21,18 +26,20 @@ func IncrementTag(opts IncrementOpts) error {
 		return nil
 	}
 
-	log.Infof("new tag: %v", version.Original())
+	log.Infof("creating new tag: %v", version.Original())
+	if err := repo.MakeTagHead(version.Original()); err != nil {
+		return err
+	}
+	if err := repo.PushTags(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func getNewTag(path string, alwaysPatch bool) (semver.Version, bool, error) {
+func getNewTag(repo *GitRepo, path string, alwaysPatch bool) (semver.Version, bool, error) {
 	errResp := func(err error) (semver.Version, bool, error) {
 		return semver.Version{}, false, err
-	}
-
-	repo, err := NewGitRepo(path)
-	if err != nil {
-		return errResp(err)
 	}
 
 	latestTag, err := repo.LatestTag()
