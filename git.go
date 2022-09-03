@@ -99,10 +99,13 @@ func (g *GitRepo) CommitsSinceHash(hash *plumbing.Hash) ([]string, error) {
 	}
 
 	// Reverse it, so we can iterate in the order things were committed
-	reversed := make([]string, 0, len(commits))
-	for i := len(commits) - 1; i >= 0; i-- {
-		reversed = append(reversed, commits[i])
-	}
+	reverseArray(commits)
+	return commits, nil
+}
 
-	return reversed, nil
+func reverseArray[T any](a []T) []T {
+	for i, j := 0, len(a) - 1; j > i; i, j = i + 1, j - 1{
+		a[i], a[j] = a[j], a[i]
+	}
+	return a
 }

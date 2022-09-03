@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestLatestTag(t *testing.T) {
@@ -52,4 +53,39 @@ func TestCommitsSinceTag(t *testing.T) {
 	commitsSince, err := g.CommitsSinceHash(&tagHash)
 	require.NoError(t, err)
 	require.Equal(t, []string{"some commit 1", "some commit 2"}, commitsSince)
+}
+
+func TestReverseArray(t *testing.T) {
+	testData := []struct {
+		name   string
+		input  []int
+		output []int
+	}{
+		{
+			name: "multiple_even",
+			input: []int{1, 2, 3, 4},
+			output: []int{4, 3, 2, 1},
+		},
+		{
+			name: "multiple_odd",
+			input: []int{1, 2, 3},
+			output: []int{3, 2, 1},
+		},
+		{
+			name: "one",
+			input: []int{1},
+			output: []int{1},
+		},
+		{
+			name: "zero",
+			input: []int{},
+			output: []int{},
+		},
+	}
+	for _, tc := range testData {
+		t.Run(tc.name, func(t *testing.T) {
+			out := reverseArray(tc.input)
+			require.Equal(t, tc.output, out)
+		})
+	}
 }
