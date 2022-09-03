@@ -58,7 +58,9 @@ func TestGetNewTag(t *testing.T) {
 	for _, tc := range testData {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := newDiskTestRepo(t, tc.commits...)
-			version, update, err := getNewTag(repo.Dir, tc.optForcePatch)
+			gitRepo, err := NewGitRepo(repo.Dir)
+			require.NoError(t, err)
+			version, update, err := getNewTag(gitRepo, repo.Dir, tc.optForcePatch)
 			require.NoError(t, err)
 			require.Equal(t, tc.expectedUpdate, update)
 			require.Equal(t, tc.expectedVersion, version)

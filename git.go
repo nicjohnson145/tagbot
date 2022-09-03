@@ -8,14 +8,33 @@ import (
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"sort"
+	"os"
+	"github.com/mitchellh/go-homedir"
+	"strings"
 	"errors"
+	"io/ioutil"
 )
 
 var errStopIteration = errors.New("stop iteration")
 
 var InitialVersion = lo.Must(semver.NewVersion("v0.0.1"))
+
+const (
+	EnvVarRemoteName = "TAGBOT_REMOTE_NAME"
+	defaultRemoteName = "origin"
+
+	EnvVarAuthMethod = "TAGBOT_AUTH_METHOD"
+
+	EnvVarToken = "TAGBOT_TOKEN"
+	EnvVarKeyPath = "TAGBOT_KEY_PATH"
+
+	sshPrefix = "git@"
+	httpsPrefix = "https://"
+)
 
 
 func NewGitRepo(path string) (*GitRepo, error) {
@@ -123,19 +142,121 @@ func (g *GitRepo) MakeTag(name string, hash plumbing.Hash) error {
 }
 
 func (g *GitRepo) PushTags() error {
-	err := g.repo.Push(&git.PushOptions{
-		RemoteName: "origin",
+	auth, err := g.getAuth()
+	if err != nil {
+		return err
+	}
+
+	err = g.repo.Push(&git.PushOptions{
+		RemoteName: g.remoteName(),
 		RefSpecs: []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
-		Auth: &http.BasicAuth{
-			Username: "TagBot",
-			Password: "",
-		},
+		Auth: auth,
 	})
 	if err != nil {
 		return fmt.Errorf("error pushing tags: %w", err)
 	}
 	return nil
 }
+
+func (g *GitRepo) getAuth() (transport.AuthMethod, error) {
+	remoteType, err := g.getRemoteType()
+	if err != nil {
+		return nil, err
+	}
+
+	switch remoteType {
+	case RemoteTypeSsh:
+		return g.sshAuth()
+	case RemoteTypeHttps:
+		return g.httpsAuth()
+	default:
+		return nil, fmt.Errorf("unhandled remote type of %v", remoteType)
+	}
+}
+
+func (g *GitRepo) getRemoteType() (RemoteType, error) {
+	allRemotes, err := g.repo.Remotes()
+	if err != nil {
+		return RemoteType(""), fmt.Errorf("error listing remotes")
+	}
+
+	remoteName := g.remoteName()
+	remote, ok := lo.Find(allRemotes, func(r *git.Remote) bool {
+		return r.Config().Name == remoteName
+	})
+	if !ok {
+		return RemoteType(""), fmt.Errorf("unable to find remote %v, use %v to specify remote name", remoteName, EnvVarRemoteName)
+	}
+
+	if val := os.Getenv(EnvVarAuthMethod); val != "" {
+		authMethod, err := ParseAuthMethod(val)
+		if err != nil {
+			return RemoteType(""), err
+		}
+
+		return AuthToRemoteMap[authMethod], nil
+	}
+
+	url := remote.Config().URLs[0]
+	if strings.HasPrefix(url, sshPrefix) {
+		return RemoteTypeSsh, nil
+	} else if strings.HasPrefix(url, httpsPrefix) {
+		return RemoteTypeHttps, nil
+	} else {
+		return RemoteType(""), fmt.Errorf(
+			"remote %v does not have either %v or %v as a prefix, cannot determine auth method. Use %v to set auth method",
+			remoteName,
+			sshPrefix,
+			httpsPrefix,
+			EnvVarAuthMethod,
+		)
+	}
+}
+
+func (g *GitRepo) remoteName() string {
+	if val, ok := os.LookupEnv(EnvVarRemoteName); ok {
+		return val
+	} else {
+		return defaultRemoteName
+	}
+}
+
+func (g *GitRepo) sshAuth() (*ssh.PublicKeys, error) {
+	var path string
+	if val := os.Getenv(EnvVarKeyPath); val != "" {
+		path = val
+	} else {
+		p := "~/.ssh/id_rsa.pub"
+		keyPath, err := homedir.Expand(p)
+		if err != nil {
+			return nil, fmt.Errorf("error expanding path %v: %w", p, err)
+		}
+		path = keyPath
+	}
+
+	sshKey, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("error reading %v: %w", path, err)
+	}
+
+	pubKey, err := ssh.NewPublicKeys("git", []byte(sshKey), "")
+	if err != nil {
+		return nil, fmt.Errorf("error handling public key: %w", err)
+	}
+
+	return pubKey, nil
+}
+
+func (g *GitRepo) httpsAuth()  (*http.BasicAuth, error) {
+	if val := os.Getenv(EnvVarToken); val != "" {
+		return &http.BasicAuth{
+			Username: "TagBot",
+			Password: val,
+		}, nil
+	}
+	return nil, fmt.Errorf("https auth requires %v to be set", EnvVarToken)
+}
+
 
 func reverseArray[T any](a []T) []T {
 	for i, j := 0, len(a) - 1; j > i; i, j = i + 1, j - 1{

@@ -45,3 +45,24 @@ major
 )
 */
 type VersionBump int
+
+/*
+ENUM(
+ssh
+https
+)
+*/
+type RemoteType string
+
+/*
+ENUM(
+public-key
+token
+)
+*/
+type AuthMethod string
+
+var AuthToRemoteMap = map[AuthMethod]RemoteType{
+	AuthMethodToken: RemoteTypeHttps,
+	AuthMethodPublicKey: RemoteTypeSsh,
+}
