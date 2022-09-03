@@ -5,4 +5,6 @@ outputs:
     description: 'Id of the newly created tag, if tag was created'
 runs:
   using: docker
-  image: Dockerfile
+  image: ghcr.io/nicjohnson145/tagbot:latest
+  args:
+  - "--debug"
