@@ -18,7 +18,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: TagBot
-      uses: nicjohnson145/tagbot@v1
+      uses: nicjohnson145/tagbot@v0.1.0
       id: tagbot
       env:
         TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
