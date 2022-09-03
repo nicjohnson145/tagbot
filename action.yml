@@ -1,0 +1,8 @@
+name: TagBot
+description: 'Automatically create tags'
+outputs:
+  tag:
+    description: 'Id of the newly created tag, if tag was created'
+runs:
+  using: docker
+  image: Dockerfile
