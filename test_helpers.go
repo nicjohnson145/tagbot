@@ -3,6 +3,10 @@ package main
 import (
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
+	"github.com/go-git/go-git/v5/storage"
+	"github.com/go-git/go-git/v5/plumbing/cache"
+	"github.com/go-git/go-git/v5/storage/filesystem"
+	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -24,15 +28,27 @@ type testRepo struct {
 	Repo     *git.Repository
 	fs       billy.Filesystem
 	filename string
+	Dir      string
 }
 
-func newTestRepo(t *testing.T, commits ...testcommit) testRepo {
+func newMemoryTestRepo(t *testing.T, commits ...testcommit) testRepo {
+	t.Helper()
+	return newTestRepo(t, memory.NewStorage(), memfs.New(), commits...)
+}
+
+func newDiskTestRepo(t *testing.T, commits ...testcommit) testRepo {
+	t.Helper()
+	dir := t.TempDir()
+	fs := osfs.New(dir)
+	repo := newTestRepo(t, filesystem.NewStorage(fs, cache.NewObjectLRUDefault()), fs, commits...)
+	repo.Dir = dir
+	return repo
+}
+
+func newTestRepo(t *testing.T, store storage.Storer, fs billy.Filesystem, commits ...testcommit) testRepo {
 	t.Helper()
 
-	storer := memory.NewStorage()
-	fs := memfs.New()
-
-	repo, err := git.Init(storer, fs)
+	repo, err := git.Init(store, fs)
 	require.NoError(t, err, "creating repo")
 
 	testRepo := testRepo{

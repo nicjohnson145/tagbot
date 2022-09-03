@@ -6,7 +6,7 @@ import (
 )
 
 func TestLatestTag(t *testing.T) {
-	repo := newTestRepo(
+	repo := newMemoryTestRepo(
 		t,
 		testcommit{
 			Msg: "foobar1",
@@ -33,7 +33,7 @@ func TestLatestTag(t *testing.T) {
 }
 
 func TestCommitsSinceTag(t *testing.T) {
-	repo := newTestRepo(t)
+	repo := newMemoryTestRepo(t)
 	tagHash := repo.MakeCommit(t, testcommit{
 		Msg: "foobar1",
 		Tag: "v0.1.0",
