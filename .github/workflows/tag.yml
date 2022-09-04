@@ -17,4 +17,4 @@ jobs:
       uses: nicjohnson145/tagbot@v0.1.0
       id: tagbot
       env:
-        TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAGBOT_TOKEN: ${{ secrets.ACTUAL_PAT }}
