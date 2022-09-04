@@ -39,3 +39,15 @@ The default `${{ secrets.GITHUB_TOKEN }}` [can't create additional workflows](ht
 If you want to use tagbot to create new tags when code is pushed to main, and goreleaser to create
 releases when a new tag is created (the whole reason I wrote tagbot :)) then you'll need to replace
 the token with a users access token.
+
+# Using commit-msg git hooks
+
+Tagbot has commit-msg git hook functionality as well. To use this functionality place the following
+script in your `.git/hooks` directory named `commit-msg` after downloading tagbot and adding it to
+your `$PATH`
+
+```sh
+#! /usr/bin/env bash
+
+tagbot commit-msg $1
+```

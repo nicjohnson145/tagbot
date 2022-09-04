@@ -10,6 +10,7 @@ import (
 func build(w io.Writer) *cobra.Command {
 	root := rootCmd(w)
 	root.AddCommand(nextCmd())
+	root.AddCommand(commitMessage())
 
 	return root
 }
@@ -65,4 +66,18 @@ func setPath(args []string, opts PathSetter) {
 	} else {
 		opts.SetPath(args[0])
 	}
+}
+
+func commitMessage() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "commit-msg",
+		Short: "Validate a commit message",
+		Long: "Used as a commit-msg hook to ensure commits conform to tagbot expected format",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return CommitMessage(args[1])
+		},
+	}
+
+	return cmd
 }
