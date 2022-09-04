@@ -33,3 +33,9 @@ jobs:
       env:
         TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+### Note about triggering other workflows
+
+The default `${{ secrets.GITHUB_TOKEN }}` [can't create additional workflows](https://github.com/orgs/community/discussions/27028#discussioncomment-3254360).
+If you want to use tagbot to create new tags when code is pushed to main, and goreleaser to create
+releases when a new tag is created (the whole reason I wrote tagbot :)) then you'll need to replace
+the token with a users access token.
