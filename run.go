@@ -112,3 +112,15 @@ func getNewTag(repo *GitRepo, path string, alwaysPatch bool) (semver.Version, bo
 	newTag := NewTagForVersionBump(latestTag.Tag, bump)
 	return newTag, true, nil
 }
+
+func CommitMessage(path string) error {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("error reading file: %w", err)
+	}
+
+	if !IsValidCommitMessage(string(content)) {
+		return fmt.Errorf("commit message does not conform to tagbot conventions")
+	}
+	return nil
+}
