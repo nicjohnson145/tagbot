@@ -2,7 +2,6 @@ project_name: tagbot
 before:
   hooks:
     - go mod tidy
-    - go generate ./...
 builds:
   - env:
       - CGO_ENABLED=0
