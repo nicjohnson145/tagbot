@@ -21,3 +21,4 @@ changelog:
   filters:
     exclude:
       - '^Merge pull request #'
+      - '^Merge branch .* into main$'
