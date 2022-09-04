@@ -1,6 +1,13 @@
 # tagbot
 Automatically created tags based on conventional commits
 
+# Using manually
+
+Download the relevant binary from [here](https://github.com/nicjohnson145/tagbot/releases/latest)
+and place it in your `$PATH`. If you've cloned the repo via ssh, then just run `tagbot` from within
+the repo you wish to create tags for. If you've cloned the repo via https then you'll need to export
+`TAGBOT_TOKEN` as an access token with the ability to create tags.
+
 # Using as a Github Action
 
 TagBot can be ran locally, or through Github Actions. Below is an example setup to only create tags
