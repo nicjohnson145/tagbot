@@ -11,6 +11,7 @@ func build(w io.Writer) *cobra.Command {
 	root := rootCmd(w)
 	root.AddCommand(nextCmd())
 	root.AddCommand(commitMessage())
+	root.AddCommand(pullRequest())
 
 	return root
 }
@@ -76,6 +77,23 @@ func commitMessage() *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return CommitMessage(args[1])
+		},
+	}
+
+	return cmd
+}
+
+func pullRequest() *cobra.Command {
+	opts := PullRequestOpts{}
+
+	cmd := &cobra.Command{
+		Use: "pull-request",
+		Short: "Validate pull request",
+		Long: "Validate all commits on a given pull request conform to tagbots expected format",
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			setPath(args, &opts)
+			return PullRequest(opts)
 		},
 	}
 

@@ -276,6 +276,14 @@ func (g *GitRepo) httpsAuth()  (*http.BasicAuth, error) {
 	return nil, fmt.Errorf("https auth requires %v to be set", EnvVarToken)
 }
 
+func (g *GitRepo) GetHashForBranch(branch string) (*plumbing.Hash, error) {
+	h, err := g.repo.ResolveRevision(plumbing.Revision(branch))
+	if err != nil {
+		return nil, fmt.Errorf("error resolving revision %v: %w", branch, err)
+	}
+	return h, nil
+}
+
 
 func reverseArray[T any](a []T) []T {
 	for i, j := 0, len(a) - 1; j > i; i, j = i + 1, j - 1{

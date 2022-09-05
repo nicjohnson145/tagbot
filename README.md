@@ -28,7 +28,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: TagBot
-      uses: nicjohnson145/tagbot@v0.1.0
+      uses: nicjohnson145/tagbot@v0.4.0
       id: tagbot
       env:
         TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,4 +50,29 @@ your `$PATH`
 #! /usr/bin/env bash
 
 tagbot commit-msg $1
+```
+
+# Running on pull requests
+
+Tagbot can retroactively validate commit messages on pull requests (if not everyone uses the
+commit-msg hook). This can be accomplished with the following github action
+```yaml
+on:
+  pull_request
+
+jobs:
+  check-commits:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: TagBot
+      uses: nicjohnson145/tagbot@v0.4.0
+      args:
+      - pull-request
+      env:
+        TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 ```
