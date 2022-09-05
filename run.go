@@ -28,6 +28,14 @@ func (o *NextOpts) SetPath(s string) {
 	o.Path = s
 }
 
+type PullRequestOpts struct {
+	Path string
+}
+
+func (o *PullRequestOpts) SetPath(s string) {
+	o.Path = s
+}
+
 func IncrementTag(opts IncrementOpts) error {
 	repo, err := NewGitRepo(opts.Path)
 	if err != nil {
@@ -121,6 +129,35 @@ func CommitMessage(path string) error {
 
 	if !IsValidCommitMessage(string(content)) {
 		return fmt.Errorf("commit message does not conform to tagbot conventions")
+	}
+	return nil
+}
+
+func PullRequest(opts PullRequestOpts) error {
+	repo, err := NewGitRepo(opts.Path)
+	if err != nil {
+		return err
+	}
+
+	ref := os.Getenv("GITHUB_BASE_REF")
+	if ref == "" {
+		return fmt.Errorf("GITHUB_BASE_REF not set, are you running in a pull request context?")
+	}
+
+	hash, err := repo.GetHashForBranch(ref)
+	if err != nil {
+		return err
+	}
+
+	commits, err := repo.CommitsSinceHash(hash)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range commits {
+		if !IsValidCommitMessage(c) {
+			return fmt.Errorf("commit does not comform to tagbot conventions\n\n%v", c)
+		}
 	}
 	return nil
 }
