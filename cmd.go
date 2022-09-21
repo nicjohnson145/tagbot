@@ -76,7 +76,7 @@ func commitMessage() *cobra.Command {
 		Long: "Used as a commit-msg hook to ensure commits conform to tagbot expected format",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return CommitMessage(args[1])
+			return CommitMessage(args[0])
 		},
 	}
 
