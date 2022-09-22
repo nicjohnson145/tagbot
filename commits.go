@@ -3,9 +3,11 @@ package main
 import (
 	"strings"
 	"errors"
+	"regexp"
 )
 
 var ErrInvalidMessage = errors.New("invalid commit message")
+var mergeRegex = regexp.MustCompile(`^Merge branch`)
 
 func IsValidCommitMessage(msg string) bool {
 	_, err := GetCommitType(msg)
@@ -16,6 +18,10 @@ func IsValidCommitMessage(msg string) bool {
 }
 
 func GetCommitType(msg string) (CommitPrefix, error) {
+	if mergeRegex.MatchString(msg) {
+		return CommitPrefixNop, nil
+	}
+
 	for prefix, regex := range PrefixRegexes {
 		if regex.MatchString(msg) {
 			return prefix, nil

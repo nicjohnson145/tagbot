@@ -70,6 +70,8 @@ func (x *AuthMethod) UnmarshalText(text []byte) error {
 }
 
 const (
+	// CommitPrefixNop is a CommitPrefix of type nop.
+	CommitPrefixNop CommitPrefix = "nop"
 	// CommitPrefixFix is a CommitPrefix of type fix.
 	CommitPrefixFix CommitPrefix = "fix"
 	// CommitPrefixFeat is a CommitPrefix of type feat.
@@ -93,6 +95,7 @@ const (
 )
 
 var _CommitPrefixNames = []string{
+	string(CommitPrefixNop),
 	string(CommitPrefixFix),
 	string(CommitPrefixFeat),
 	string(CommitPrefixChore),
@@ -124,6 +127,7 @@ func (x CommitPrefix) IsValid() bool {
 }
 
 var _CommitPrefixValue = map[string]CommitPrefix{
+	"nop":      CommitPrefixNop,
 	"fix":      CommitPrefixFix,
 	"feat":     CommitPrefixFeat,
 	"chore":    CommitPrefixChore,
