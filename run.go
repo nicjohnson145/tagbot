@@ -122,6 +122,23 @@ func getNewTag(repo *GitRepo, path string, alwaysPatch bool) (semver.Version, bo
 }
 
 func CommitMessage(path string) error {
+	// Per git documentation:
+	// Before Git invokes a hook, it changes its working directory to either $GIT_DIR in a bare
+	// repository or the root of the working tree in a non-bare repository
+	repo, err := NewGitRepo(".")
+	if err != nil {
+		return err
+	}
+
+	disabled, err := repo.IsTagbotDisabled()
+	if err != nil {
+		return err
+	}
+
+	if disabled {
+		return nil
+	}
+
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("error reading file: %w", err)

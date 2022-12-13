@@ -52,6 +52,19 @@ your `$PATH`
 tagbot commit-msg $1
 ```
 
+### Global git hooks & disabling
+
+Setting `core.hooksPath` in your global gitconfig can allow you to run tagbot for every repo you
+clone. This greatly cuts down on repeated setup, as well as lowers the change that the hook will be
+forgotten on a new clone. However, not *every* repo needs to conform to tagbot. Tagbot can be
+disabled for an individual repo by running
+
+```sh
+git config --add tagbot.disable true
+```
+
+in any repo that you wish tagbots `commit-msg` hook not to run
+
 # Running on pull requests
 
 Tagbot can retroactively validate commit messages on pull requests (if not everyone uses the
