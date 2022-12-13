@@ -284,6 +284,18 @@ func (g *GitRepo) GetHashForBranch(branch string) (*plumbing.Hash, error) {
 	return h, nil
 }
 
+func (g *GitRepo) IsTagbotDisabled() (bool, error) {
+	conf, err := g.repo.Config()
+	if err != nil {
+		return false, fmt.Errorf("error fetching git config: %w", err)
+	}
+
+	if !conf.Raw.HasSection("tagbot") {
+		return false, nil
+	}
+
+	return conf.Raw.Section("tagbot").Option("disable") == "true", nil
+}
 
 func reverseArray[T any](a []T) []T {
 	for i, j := 0, len(a) - 1; j > i; i, j = i + 1, j - 1{
