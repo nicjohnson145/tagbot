@@ -5,4 +5,4 @@ outputs:
     description: 'Id of the newly created tag, if tag was created'
 runs:
   using: docker
-  image: docker://ghcr.io/nicjohnson145/tagbot:v0.5.0
+  image: docker://ghcr.io/nicjohnson145/tagbot:v0.5.2

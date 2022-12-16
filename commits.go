@@ -30,8 +30,16 @@ func GetCommitType(msg string) (CommitPrefix, error) {
 	return CommitPrefix(""), ErrInvalidMessage
 }
 
-func IsBreakingChange(msg string) bool {
-	return strings.Contains(msg, BreakingChange)
+func IsBreakingChange(msg string, prefix CommitPrefix) bool {
+	if strings.Contains(msg, BreakingChange) {
+		return true
+	}
+
+	if BreakingPrefixes[prefix].MatchString(msg) {
+		return true
+	}
+
+	return false
 }
 
 func CommitMessageToVersionBump(msg string) (VersionBump, error) {
@@ -40,7 +48,7 @@ func CommitMessageToVersionBump(msg string) (VersionBump, error) {
 		return VersionBump(-1), err
 	}
 
-	if IsBreakingChange(msg) {
+	if IsBreakingChange(msg, prefix) {
 		return VersionBumpMajor, nil
 	}
 

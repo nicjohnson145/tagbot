@@ -88,6 +88,20 @@ func TestGetVersionBumpForCommits(t *testing.T) {
 			Bump: VersionBumpNone,
 		},
 		{
+			Commits: []string{
+				"feat: do a thing",
+				"refactor!: make a breaking refactor",
+			},
+			Bump: VersionBumpMajor,
+		},
+		{
+			Commits: []string{
+				"feat: do a thing",
+				"refactor(config)!: make a breaking refactor",
+			},
+			Bump: VersionBumpMajor,
+		},
+		{
 			Commits: []string{},
 			Bump: VersionBumpNone,
 		},

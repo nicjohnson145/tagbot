@@ -38,6 +38,19 @@ var PrefixRegexes = lo.FromEntries(lo.Map(
 	},
 ))
 
+var BreakingPrefixes = lo.FromEntries(lo.Map(
+	lo.Filter(CommitPrefixNames(), func(p string, _ int) bool {
+		return p != CommitPrefixNop.String()
+	}),
+	func(p string, _ int) lo.Entry[CommitPrefix, *regexp.Regexp] {
+		return lo.Entry[CommitPrefix, *regexp.Regexp]{
+			// Safe to cast here since we're iterating over the generated names, we can't get a bad one
+			Key: CommitPrefix(p),
+			Value: regexp.MustCompile(fmt.Sprintf(`(?i)^%v(\(.*\))?!: .*`, p)),
+		}
+	},
+))
+
 const (
 	BreakingChange = "BREAKING CHANGE"
 )
