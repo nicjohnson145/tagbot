@@ -41,6 +41,7 @@ func rootCmd(w io.Writer) *cobra.Command {
 	}
 	cmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Enable debug logging")
 	cmd.Flags().BoolVarP(&opts.AlwaysPatch, "always-patch", "p",  false, "Always increment the patch version, unless another version bump is required")
+	cmd.Flags().BoolVarP(&opts.MaintainLatest, "maintain-latest", "l",  false, "Maintain a 'latest' tag")
 
 	return cmd
 }

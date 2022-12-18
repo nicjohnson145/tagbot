@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Masterminds/semver"
 	"github.com/apex/log"
 	"os"
-	"fmt"
 )
 
 type PathSetter interface {
@@ -12,8 +12,9 @@ type PathSetter interface {
 }
 
 type IncrementOpts struct {
-	Path        string
-	AlwaysPatch bool
+	Path           string
+	AlwaysPatch    bool
+	MaintainLatest bool
 }
 
 func (o *IncrementOpts) SetPath(s string) {
@@ -58,6 +59,15 @@ func IncrementTag(opts IncrementOpts) error {
 	}
 	if err := repo.PushTags(); err != nil {
 		return err
+	}
+	if opts.MaintainLatest {
+		log.Debugf("creating latest tag")
+		if err := repo.MakeTagHead("latest"); err != nil {
+			return err
+		}
+		if err := repo.ForcePushTags(); err != nil {
+			return err
+		}
 	}
 
 	if os.Getenv("GITHUB_ACTIONS") == "true" {

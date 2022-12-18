@@ -161,6 +161,14 @@ func (g *GitRepo) MakeTag(name string, hash plumbing.Hash) error {
 }
 
 func (g *GitRepo) PushTags() error {
+	return g.pushTags(false)
+}
+
+func (g *GitRepo) ForcePushTags() error {
+	return g.pushTags(true)
+}
+
+func (g *GitRepo) pushTags(force bool) error {
 	auth, err := g.getAuth()
 	if err != nil {
 		return err
@@ -170,6 +178,7 @@ func (g *GitRepo) PushTags() error {
 		RemoteName: g.remoteName(),
 		RefSpecs: []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
 		Auth: auth,
+		Force: force,
 	})
 	if err != nil {
 		return fmt.Errorf("error pushing tags: %w", err)
