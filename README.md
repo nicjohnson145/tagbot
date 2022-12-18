@@ -28,7 +28,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: TagBot
-      uses: nicjohnson145/tagbot@v0.5.2
+      uses: nicjohnson145/tagbot@latest
       id: tagbot
       env:
         TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,7 +82,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: TagBot
-      uses: nicjohnson145/tagbot@v0.5.2
+      uses: nicjohnson145/tagbot@latest
       args:
       - pull-request
       env:
