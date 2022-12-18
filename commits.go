@@ -31,6 +31,10 @@ func GetCommitType(msg string) (CommitPrefix, error) {
 }
 
 func IsBreakingChange(msg string, prefix CommitPrefix) bool {
+	if prefix == CommitPrefixNop {
+		return false
+	}
+
 	if strings.Contains(msg, BreakingChange) {
 		return true
 	}
