@@ -145,6 +145,18 @@ func (g *GitRepo) MakeTagHead(name string) error {
 	return g.MakeTag(name, h.Hash())
 }
 
+func (g *GitRepo) RemakeTagHead(name string) error {
+	h, err := g.repo.Head()
+	if err != nil {
+		return fmt.Errorf("error getting repo head: %w", err)
+	}
+	err = g.repo.DeleteTag(name)
+	if err != nil && !errors.Is(err, git.ErrTagNotFound) {
+		return fmt.Errorf("error deleting old tag: %w", err)
+	}
+	return g.MakeTag(name, h.Hash())
+}
+
 func (g *GitRepo) MakeTag(name string, hash plumbing.Hash) error {
 	_, err := g.repo.CreateTag(name, hash, &git.CreateTagOptions{
 		Message: "created by TagBot",

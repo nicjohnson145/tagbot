@@ -62,7 +62,7 @@ func IncrementTag(opts IncrementOpts) error {
 	}
 	if opts.MaintainLatest {
 		log.Debugf("creating latest tag")
-		if err := repo.MakeTagHead("latest"); err != nil {
+		if err := repo.RemakeTagHead("latest"); err != nil {
 			return err
 		}
 		if err := repo.ForcePushTags(); err != nil {
