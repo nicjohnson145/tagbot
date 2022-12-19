@@ -78,7 +78,7 @@ func IncrementTag(opts IncrementOpts) error {
 				return fmt.Errorf("error opening $GITHUB_OUTPUT file: %w", err)
 			}
 			defer f.Close()
-			fmt.Fprintf(f, "::set-output name=tag::%v\n", version.Original())
+			fmt.Fprintf(f, "tag=%v\n", version.Original())
 		} else {
 			fmt.Printf("::set-output name=tag::%v\n", version.Original())
 		}
