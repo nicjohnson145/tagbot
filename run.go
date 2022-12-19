@@ -71,7 +71,17 @@ func IncrementTag(opts IncrementOpts) error {
 	}
 
 	if os.Getenv("GITHUB_ACTIONS") == "true" {
-		fmt.Printf("::set-output name=tag::%v\n", version.Original())
+		path, ok := os.LookupEnv("GITHUB_OUTPUT")
+		if ok {
+			f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return fmt.Errorf("error opening $GITHUB_OUTPUT file: %w", err)
+			}
+			defer f.Close()
+			fmt.Fprintf(f, "tag=%v\n", version.Original())
+		} else {
+			fmt.Printf("::set-output name=tag::%v\n", version.Original())
+		}
 	}
 
 	return nil
