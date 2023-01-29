@@ -16,7 +16,7 @@ tasks:
   docker-build-test:
     desc: Build and push docker image for integration testing
     vars:
-      IMAGE: nicjohnson145/tagbot:develop
+      IMAGE: ghcr.io/nicjohnson145/tagbot:develop
     cmds:
     - docker build . -t {{ .IMAGE }}
     - docker push {{ .IMAGE }}
