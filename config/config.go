@@ -20,7 +20,7 @@ const (
 )
 
 func InitializeConfig(cmd *cobra.Command) error {
-	path, err := homedir.Expand("~/.ssh/id_rsa.pub")
+	path, err := homedir.Expand("~/.ssh/id_ecdsa")
 	if err != nil {
 		return fmt.Errorf("error expanding home dir: %w", err)
 	}

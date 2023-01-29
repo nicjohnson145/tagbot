@@ -64,6 +64,8 @@ func (t *Tagbot) Increment() error {
 		return fmt.Errorf("error pushing new tag: %w", err)
 	}
 
+	t.log.Info().Msgf("created tag %v", version.Original())
+
 	if t.config.Latest {
 		t.log.Debug().Msg("starting 'latest' tag creation")
 		if err := t.config.Repo.RemakeTagHead("latest"); err != nil {
@@ -74,6 +76,8 @@ func (t *Tagbot) Increment() error {
 			t.log.Err(err).Msg("pushing 'latest' tag")
 			return fmt.Errorf("error pushing 'latest' tag: %w", err)
 		}
+
+		t.log.Info().Msg("created tag 'latest'")
 	}
 
 	return nil

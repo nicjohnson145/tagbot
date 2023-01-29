@@ -196,6 +196,7 @@ func (g *GitRepo) pushTags(force bool) error {
 		return fmt.Errorf("error getting authentication: %w", err)
 	}
 
+	g.log.Debug().Str("remote", g.config.Remote).Bool("force", force).Msg("pushing tag")
 	err = g.repo.Push(&git.PushOptions{
 		RemoteName: g.config.Remote,
 		RefSpecs:   []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
