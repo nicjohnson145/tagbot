@@ -27,7 +27,7 @@ type Config struct {
 	Logger      zerolog.Logger
 	Path        string
 	Remote      string
-	AuthMethod  *AuthMethod
+	AuthMethod  string
 	AuthKeyPath string
 	AuthToken   string
 }
@@ -210,14 +210,19 @@ func (g *GitRepo) pushTags(force bool) error {
 }
 
 func (g *GitRepo) getAuth() (transport.AuthMethod, error) {
-	if g.config.AuthMethod != nil {
-		switch *g.config.AuthMethod {
+	if g.config.AuthMethod != "" {
+		method, err := ParseAuthMethod(g.config.AuthMethod)
+		if err != nil {
+			g.log.Err(err).Msg("parsing auth method")
+			return nil, fmt.Errorf("error parsing auth method: %w", err)
+		}
+		switch method {
 		case AuthMethodPublicKey:
 			return g.sshAuth()
 		case AuthMethodToken:
 			return g.httpsAuth()
 		default:
-			return nil, fmt.Errorf("unhandled auth method %v", *g.config.AuthMethod)
+			return nil, fmt.Errorf("unhandled auth method %v", g.config.AuthMethod)
 		}
 	}
 

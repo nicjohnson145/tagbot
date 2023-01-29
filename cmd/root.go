@@ -1,29 +1,25 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/nicjohnson145/tagbot/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func Root() *cobra.Command {
 	root := &cobra.Command{
 		Use: "tagbot",
+		Short: "analyze and create tag",
+		Long: "Analyze commits and create new tag if necessary",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			return config.InitializeConfig(cmd)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println("remote name: ", viper.GetString(config.RemoteName))
-			fmt.Println("auth method: ", viper.GetString(config.AuthMethod))
-			fmt.Println("auth token: ", viper.GetString(config.AuthToken))
-			fmt.Println("auth key path: ", viper.GetString(config.AuthKeyPath))
-			fmt.Println("debug: ", viper.GetBool(config.Debug))
-			fmt.Println("patch: ", viper.GetBool(config.AlwaysPatch))
-			fmt.Println("latest: ", viper.GetBool(config.Latest))
-
-			return nil
+			tagbot, err := createTagbot()
+			if err != nil {
+				return err
+			}
+			return tagbot.Increment()
 		},
 	}
 	root.Flags().StringP(config.RemoteName, "r", "origin", "The remote name to push tags to")

@@ -11,5 +11,5 @@ tasks:
   generate:
     desc: Run all code generation
     cmds:
-    - task: mocks
     - task: go-generate
+    - task: mocks
