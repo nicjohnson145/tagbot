@@ -3,6 +3,7 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -96,6 +97,30 @@ func (t *Tagbot) Next() error {
 	}
 
 	t.log.Info().Str("tag", version.Original()).Msg("new tag required")
+	return nil
+}
+
+func (t *Tagbot) CommitMessage(path string) error {
+	disabled, err := t.config.Repo.IsTagbotDisabled()
+	if err != nil {
+		t.log.Err(err).Msg("checking if tagbot is disabled")
+		return fmt.Errorf("error checking if tagbot is disabled: %w", err)
+	}
+
+	if disabled {
+		t.log.Debug().Msg("skipping validation, tagbot disabled")
+		return nil
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.log.Err(err).Msg("reading commit message file")
+		return fmt.Errorf("error reading commit message file: %w", err)
+	}
+
+	if !t.isValidCommitMessage(string(content)) {
+		return fmt.Errorf("commit message does not conform to tagbot conventions")
+	}
 	return nil
 }
 

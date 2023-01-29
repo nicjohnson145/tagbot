@@ -12,6 +12,7 @@ func Root() *cobra.Command {
 		Long: "Analyze commits and create new tag if necessary",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 			return config.InitializeConfig(cmd)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -34,6 +35,7 @@ func Root() *cobra.Command {
 
 	root.AddCommand(
 		next(),
+		commitMsg(),
 	)
 
 	return root
