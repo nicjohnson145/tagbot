@@ -14,7 +14,7 @@ func next() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return tagbot.Increment()
+			return tagbot.Next()
 		},
 	}
 
