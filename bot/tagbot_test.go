@@ -209,3 +209,60 @@ func TestCommitMessage(t *testing.T) {
 		})
 	}
 }
+
+func TestPullRequest(t *testing.T) {
+	const branch = "feat--my-cool-branch"
+	commits := []string{
+		"invalid commit",
+		"feat: valid 1",
+		"feat: valid 2",
+	}
+
+	t.Run("valid", func(t *testing.T) {
+		repo := gitMock.NewRepo(t)
+		repo.EXPECT().GetHashForBranch(branch).Return(hashStr, nil)
+		repo.EXPECT().CommitsSinceHash(hashStr).Return(commits[1:], nil)
+
+		tagbot := New(Config{
+			Repo: repo,
+		})
+		require.NoError(t, tagbot.PullRequest(branch))
+	})
+
+	t.Run("invalid", func(t *testing.T) {
+		repo := gitMock.NewRepo(t)
+		repo.EXPECT().GetHashForBranch(branch).Return(hashStr, nil)
+		repo.EXPECT().CommitsSinceHash(hashStr).Return(commits, nil)
+
+		tagbot := New(Config{
+			Repo: repo,
+		})
+		require.Error(t, tagbot.PullRequest(branch))
+	})
+
+	t.Run("inferred gitlab", func(t *testing.T) {
+		t.Setenv("GITHUB_BASE_REF", branch)
+
+		repo := gitMock.NewRepo(t)
+		repo.EXPECT().GetHashForBranch(branch).Return(hashStr, nil)
+		repo.EXPECT().CommitsSinceHash(hashStr).Return(commits[1:], nil)
+
+		tagbot := New(Config{
+			Repo: repo,
+		})
+		require.NoError(t, tagbot.PullRequest(""))
+	})
+
+	t.Run("inferred github", func(t *testing.T) {
+		t.Setenv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME", branch)
+
+		repo := gitMock.NewRepo(t)
+		repo.EXPECT().GetHashForBranch(branch).Return(hashStr, nil)
+		repo.EXPECT().CommitsSinceHash(hashStr).Return(commits[1:], nil)
+
+		tagbot := New(Config{
+			Repo: repo,
+		})
+		require.NoError(t, tagbot.PullRequest(""))
+	})
+}
