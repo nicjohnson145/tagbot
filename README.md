@@ -18,6 +18,8 @@ on:
   push:
     branches:
     - main
+    tags-ignore:
+    - '**'
 
 jobs:
   build-tag:
