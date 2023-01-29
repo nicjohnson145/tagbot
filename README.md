@@ -6,7 +6,7 @@ Automatically created tags based on conventional commits
 Download the relevant binary from [here](https://github.com/nicjohnson145/tagbot/releases/latest)
 and place it in your `$PATH`. If you've cloned the repo via ssh, then just run `tagbot` from within
 the repo you wish to create tags for. If you've cloned the repo via https then you'll need to export
-`TAGBOT_TOKEN` as an access token with the ability to create tags.
+`AUTH_TOKEN` as an access token with the ability to create tags.
 
 # Using as a Github Action
 
@@ -31,7 +31,7 @@ jobs:
       uses: nicjohnson145/tagbot@latest
       id: tagbot
       env:
-        TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 ### Note about triggering other workflows
 
@@ -85,7 +85,19 @@ jobs:
       uses: nicjohnson145/tagbot@latest
       args:
       - pull-request
-      env:
-        TAGBOT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 ```
+# Options
+
+Tagbot supports a number of options, either on the command line or through environment variables
+
+| Command Line | Environment | Use |
+| ------------ | ----------- | --- |
+| `--debug` | `DEBUG` | Enable debug logging |
+| `--latest` | `LATEST` | Maintain a `latest` tag in addition to the SemVer tags |
+| `--always-patch` | `ALWAYS_PATCH` | If the run were to result in no tag being created, instead create a tag with a patch version bump|
+| `--remote-name` | `REMOTE_NAME` | Name of the remote to push tags to, defaults to `origin` |
+| `--auth-method` | `AUTH_METHOD` | What method to use to auth, defaults to clone method of remote |
+| `--auth-token` | `AUTH_TOKEN` | Token to use during HTTPS authentication |
+| `--auth-key-path` | `AUTH_KEY_PATH` | Path to key to use during SSH authentication |
+| `--base-branch` | `BASE_BRANCH` | Base branch for merge request, will attempt to infer from well known CI systems variables |

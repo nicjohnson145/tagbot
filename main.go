@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/apex/log"
-	"os"
+	"github.com/nicjohnson145/tagbot/cmd"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	if err := build(os.Stdout).Execute(); err != nil {
-		log.WithError(err).Fatal("error during execution")
+	if err := cmd.Root().Execute(); err != nil {
+		log.Fatal().Msg(err.Error())
 	}
 }

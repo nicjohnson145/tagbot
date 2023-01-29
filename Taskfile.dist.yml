@@ -1,0 +1,22 @@
+version: '3'
+tasks:
+  mocks:
+    desc: Generate mocks
+    cmds:
+    - mockery --all --keeptree --disable-version-string --with-expecter
+  go-generate:
+    desc: Run go generate
+    cmds:
+    - go generate ./...
+  generate:
+    desc: Run all code generation
+    cmds:
+    - task: go-generate
+    - task: mocks
+  docker-build-test:
+    desc: Build and push docker image for integration testing
+    vars:
+      IMAGE: ghcr.io/nicjohnson145/tagbot:develop
+    cmds:
+    - docker build . -t {{ .IMAGE }}
+    - docker push {{ .IMAGE }}
