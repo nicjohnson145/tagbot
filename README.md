@@ -87,3 +87,17 @@ jobs:
       - pull-request
 
 ```
+# Options
+
+Tagbot supports a number of options, either on the command line or through environment variables
+
+| Command Line | Environment | Use |
+| ------------ | ----------- | --- |
+| `--debug` | `DEBUG` | Enable debug logging |
+| `--latest` | `LATEST` | Maintain a `latest` tag in addition to the SemVer tags |
+| `--always-patch` | `ALWAYS_PATCH` | If the run were to result in no tag being created, instead create a tag with a patch version bump|
+| `--remote-name` | `REMOTE_NAME` | Name of the remote to push tags to, defaults to `origin` |
+| `--auth-method` | `AUTH_METHOD` | What method to use to auth, defaults to clone method of remote |
+| `--auth-token` | `AUTH_TOKEN` | Token to use during HTTPS authentication |
+| `--auth-key-path` | `AUTH_KEY_PATH` | Path to key to use during SSH authentication |
+| `--base-branch` | `BASE_BRANCH` | Base branch for merge request, will attempt to infer from well known CI systems variables |
