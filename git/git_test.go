@@ -30,8 +30,8 @@ func newMemoryTestRepo(t *testing.T, commits ...testcommit) testRepo {
 	require.NoError(t, err, "creating repo")
 
 	testRepo := testRepo{
-		Repo: repo,
-		fs:   fs,
+		Repo:     repo,
+		fs:       fs,
 		filename: "commit-message",
 	}
 
@@ -140,23 +140,23 @@ func TestReverseArray(t *testing.T) {
 		output []int
 	}{
 		{
-			name: "multiple_even",
-			input: []int{1, 2, 3, 4},
+			name:   "multiple_even",
+			input:  []int{1, 2, 3, 4},
 			output: []int{4, 3, 2, 1},
 		},
 		{
-			name: "multiple_odd",
-			input: []int{1, 2, 3},
+			name:   "multiple_odd",
+			input:  []int{1, 2, 3},
 			output: []int{3, 2, 1},
 		},
 		{
-			name: "one",
-			input: []int{1},
+			name:   "one",
+			input:  []int{1},
 			output: []int{1},
 		},
 		{
-			name: "zero",
-			input: []int{},
+			name:   "zero",
+			input:  []int{},
 			output: []int{},
 		},
 	}

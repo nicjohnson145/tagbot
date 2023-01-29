@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	sshPrefix = "git@"
+	sshPrefix   = "git@"
 	httpsPrefix = "https://"
 )
 
@@ -44,6 +44,6 @@ token
 type AuthMethod string
 
 var AuthToRemoteMap = map[AuthMethod]RemoteType{
-	AuthMethodToken: RemoteTypeHttps,
+	AuthMethodToken:     RemoteTypeHttps,
 	AuthMethodPublicKey: RemoteTypeSsh,
 }

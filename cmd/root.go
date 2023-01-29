@@ -7,9 +7,9 @@ import (
 
 func Root() *cobra.Command {
 	root := &cobra.Command{
-		Use: "tagbot",
+		Use:   "tagbot",
 		Short: "analyze and create tag",
-		Long: "Analyze commits and create new tag if necessary",
+		Long:  "Analyze commits and create new tag if necessary",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true

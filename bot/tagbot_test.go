@@ -186,8 +186,8 @@ func TestCommitMessage(t *testing.T) {
 			Valid: false,
 		},
 		{
-			Msg:   "bad commit message but we're disabled",
-			Valid: true,
+			Msg:      "bad commit message but we're disabled",
+			Valid:    true,
 			Disabled: true,
 		},
 	}

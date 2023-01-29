@@ -8,9 +8,9 @@ import (
 
 func pullRequest() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "pull-request",
+		Use:   "pull-request",
 		Short: "Validate pull request",
-		Long: "Validate all commits on a given pull request conform to tagbots expected format",
+		Long:  "Validate all commits on a given pull request conform to tagbots expected format",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tagbot, err := createTagbot()
 			if err != nil {

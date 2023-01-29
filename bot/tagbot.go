@@ -13,7 +13,6 @@ import (
 	"github.com/samber/lo"
 )
 
-
 const (
 	BreakingChange = "BREAKING CHANGE"
 )
