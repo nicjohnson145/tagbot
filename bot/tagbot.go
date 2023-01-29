@@ -83,6 +83,22 @@ func (t *Tagbot) Increment() error {
 	return nil
 }
 
+func (t *Tagbot) Next() error {
+	version, err := t.getNewTag()
+	if err != nil {
+		t.log.Err(err).Msg("computing new tag")
+		return fmt.Errorf("error computing new tag: %w", err)
+	}
+
+	if version == nil {
+		t.log.Info().Msg("up to date")
+		return nil
+	}
+
+	t.log.Info().Str("tag", version.Original()).Msg("new tag required")
+	return nil
+}
+
 func (t *Tagbot) getNewTag() (*semver.Version, error) {
 	latestTag, err := t.config.Repo.LatestTag()
 	if err != nil {

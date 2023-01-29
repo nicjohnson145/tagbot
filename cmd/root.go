@@ -22,14 +22,19 @@ func Root() *cobra.Command {
 			return tagbot.Increment()
 		},
 	}
+	root.PersistentFlags().BoolP(config.Debug, "d", false, "Enable debug logging")
+
 	root.Flags().StringP(config.RemoteName, "r", "origin", "The remote name to push tags to")
 	root.Flags().StringP(config.AuthMethod, "a", "", "Override the auth method to use to push tags")
 	root.Flags().StringP(config.AuthToken, "t", "", "The auth token to use during token based auth")
 	root.Flags().StringP(config.AuthKeyPath, "k", "", "Path to key to use during key based auth")
 
-	root.Flags().BoolP(config.Debug, "d", false, "Enable debug logging")
 	root.Flags().BoolP(config.AlwaysPatch, "p", false, "Increment patch version even if no version bump is required")
 	root.Flags().BoolP(config.Latest, "l", false, "Maintain a 'latest' tag")
+
+	root.AddCommand(
+		next(),
+	)
 
 	return root
 }
