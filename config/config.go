@@ -17,6 +17,7 @@ const (
 	AuthMethod  = "auth-method"
 	AuthToken   = "auth-token"
 	AuthKeyPath = "auth-key-path"
+	BaseBranch  = "base-branch"
 )
 
 func InitializeConfig(cmd *cobra.Command) error {

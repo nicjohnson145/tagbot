@@ -36,6 +36,7 @@ func Root() *cobra.Command {
 	root.AddCommand(
 		next(),
 		commitMsg(),
+		pullRequest(),
 	)
 
 	return root

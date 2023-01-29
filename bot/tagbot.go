@@ -124,6 +124,51 @@ func (t *Tagbot) CommitMessage(path string) error {
 	return nil
 }
 
+func (t *Tagbot) PullRequest(baseBranch string) error {
+	if baseBranch == "" {
+		inferred := t.inferBaseBranch()
+		if inferred == "" {
+			t.log.Error().Msg("cannot infer base branch")
+			return fmt.Errorf("cannot infer base branch")
+		}
+		baseBranch = inferred
+	}
+
+	hash, err := t.config.Repo.GetHashForBranch(baseBranch)
+	if err != nil {
+		t.log.Err(err).Msg("getting hash for branch")
+		return fmt.Errorf("error getting hash for branch: %w", err)
+	}
+
+	commits, err := t.config.Repo.CommitsSinceHash(hash)
+	if err != nil {
+		t.log.Err(err).Msg("getting commit list")
+		return fmt.Errorf("error getting commit list: %w", err)
+	}
+
+	for _, c := range commits {
+		if !t.isValidCommitMessage(c) {
+			return fmt.Errorf("commit does not comform to tagbot conventions\n\n%v", c)
+		}
+	}
+
+	return nil
+}
+
+func (t *Tagbot) inferBaseBranch() string {
+	// Github Actions
+	if ref := os.Getenv("GITHUB_BASE_REF"); ref != "" {
+		return ref
+	}
+
+	// Gitlab pipelines
+	if ref := os.Getenv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME"); ref != "" {
+		return ref
+	}
+
+	return ""
+}
+
 func (t *Tagbot) getNewTag() (*semver.Version, error) {
 	latestTag, err := t.config.Repo.LatestTag()
 	if err != nil {
