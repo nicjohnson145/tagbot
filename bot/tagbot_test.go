@@ -265,4 +265,13 @@ func TestPullRequest(t *testing.T) {
 		})
 		require.NoError(t, tagbot.PullRequest(""))
 	})
+
+	t.Run("cant infer", func(t *testing.T) {
+		repo := gitMock.NewRepo(t)
+
+		tagbot := New(Config{
+			Repo: repo,
+		})
+		require.Error(t, tagbot.PullRequest(""))
+	})
 }
