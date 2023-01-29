@@ -13,3 +13,10 @@ tasks:
     cmds:
     - task: go-generate
     - task: mocks
+  docker-build-test:
+    desc: Build and push docker image for integration testing
+    vars:
+      IMAGE: nicjohnson145/tagbot:develop
+    cmds:
+    - docker build . -t {{ .IMAGE }}
+    - docker push {{ .IMAGE }}
