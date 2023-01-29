@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +18,11 @@ func commitMsg() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return tagbot.CommitMessage(args[0])
+			content, err := os.ReadFile(args[0])
+			if err != nil {
+				return fmt.Errorf("error reading commit message file: %w", err)
+			}
+			return tagbot.CommitMessage(string(content))
 		},
 	}
 

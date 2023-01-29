@@ -17,45 +17,6 @@ func dedentMsg(s string) string {
 	return dedent.Dedent(s)[1:]
 }
 
-func TestIsValidCommitMessage(t *testing.T) {
-	testData := []struct {
-		Msg   string
-		Valid bool
-	}{
-		{
-			Msg:   "feat: allow provided config object to extend other configs",
-			Valid: true,
-		},
-		{
-			Msg:   "FEAT: allow provided config object to extend other configs",
-			Valid: true,
-		},
-		{
-			Msg:   "feat(lang): add polish language",
-			Valid: true,
-		},
-		{
-			Msg: dedentMsg(`
-				chore!: drop Node 6 from testing matrix
-
-				BREAKING CHANGE: dropping Node 6 which hits end of life in April
-			`),
-			Valid: true,
-		},
-		{
-			Msg:   "fixed a couple bugs with the thing",
-			Valid: false,
-		},
-	}
-	for idx, tc := range testData {
-		t.Run(fmt.Sprint(idx), func(t *testing.T) {
-			tagbot := New(Config{})
-			valid := tagbot.isValidCommitMessage(tc.Msg)
-			require.Equal(t, tc.Valid, valid, tc.Msg)
-		})
-	}
-}
-
 func TestGetVersionBumpForCommits(t *testing.T) {
 	testData := []struct {
 		Commits []string
@@ -110,7 +71,7 @@ func TestGetVersionBumpForCommits(t *testing.T) {
 		},
 		{
 			Commits: []string{},
-			Bump: VersionBumpNone,
+			Bump:    VersionBumpNone,
 		},
 	}
 	for idx, tc := range testData {
@@ -153,7 +114,7 @@ func TestIncrement(t *testing.T) {
 		repo.EXPECT().ForcePushTags().Return(nil)
 
 		tagbot := New(Config{
-			Repo: repo,
+			Repo:   repo,
 			Latest: true,
 		})
 		require.NoError(t, tagbot.Increment())
@@ -172,7 +133,7 @@ func TestIncrement(t *testing.T) {
 		repo.EXPECT().PushTags().Return(nil)
 
 		tagbot := New(Config{
-			Repo: repo,
+			Repo:        repo,
 			AlwaysPatch: true,
 		})
 		require.NoError(t, tagbot.Increment())
@@ -192,4 +153,59 @@ func TestNext(t *testing.T) {
 		})
 		require.NoError(t, tagbot.Next())
 	})
+}
+
+func TestCommitMessage(t *testing.T) {
+	testData := []struct {
+		Msg      string
+		Valid    bool
+		Disabled bool
+	}{
+		{
+			Msg:   "feat: allow provided config object to extend other configs",
+			Valid: true,
+		},
+		{
+			Msg:   "FEAT: allow provided config object to extend other configs",
+			Valid: true,
+		},
+		{
+			Msg:   "feat(lang): add polish language",
+			Valid: true,
+		},
+		{
+			Msg: dedentMsg(`
+				chore!: drop Node 6 from testing matrix
+
+				BREAKING CHANGE: dropping Node 6 which hits end of life in April
+			`),
+			Valid: true,
+		},
+		{
+			Msg:   "fixed a couple bugs with the thing",
+			Valid: false,
+		},
+		{
+			Msg:   "bad commit message but we're disabled",
+			Valid: true,
+			Disabled: true,
+		},
+	}
+	for idx, tc := range testData {
+		t.Run(fmt.Sprint(idx), func(t *testing.T) {
+			t.TempDir()
+			repo := gitMock.NewRepo(t)
+			repo.EXPECT().IsTagbotDisabled().Return(tc.Disabled, nil)
+
+			tagbot := New(Config{
+				Repo: repo,
+			})
+			err := tagbot.CommitMessage(tc.Msg)
+			if tc.Valid {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
 }
