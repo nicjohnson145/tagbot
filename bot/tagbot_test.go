@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const hashStr = "3f90193ad5ec9cdd6ee2af363d20b4205405d4bf"
+
 func dedentMsg(s string) string {
 	return dedent.Dedent(s)[1:]
 }
@@ -122,7 +124,6 @@ func TestGetVersionBumpForCommits(t *testing.T) {
 }
 
 func TestIncrement(t *testing.T) {
-	const hashStr = "3f90193ad5ec9cdd6ee2af363d20b4205405d4bf"
 	var commitMessages = []string{
 		"feat: did a thing",
 		"fix: fixed a thing",
@@ -175,5 +176,20 @@ func TestIncrement(t *testing.T) {
 			AlwaysPatch: true,
 		})
 		require.NoError(t, tagbot.Increment())
+	})
+}
+
+func TestNext(t *testing.T) {
+	// It's an info only command, so just make sure it doesnt explode. It uses most of the same code
+	// as increment so it should be pretty well tested
+	t.Run("smokes", func(t *testing.T) {
+		repo := gitMock.NewRepo(t)
+		repo.EXPECT().LatestTag().Return(&git.Tag{Tag: semver.MustParse("v1.0.0"), Hash: hashStr}, nil)
+		repo.EXPECT().CommitsSinceHash(hashStr).Return([]string{"feat: do a thing"}, nil)
+
+		tagbot := New(Config{
+			Repo: repo,
+		})
+		require.NoError(t, tagbot.Next())
 	})
 }
