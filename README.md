@@ -101,5 +101,6 @@ Tagbot supports a number of options, either on the command line or through envir
 | `--remote-name` | `REMOTE_NAME` | Name of the remote to push tags to, defaults to `origin` |
 | `--auth-method` | `AUTH_METHOD` | What method to use to auth, defaults to clone method of remote |
 | `--auth-token` | `AUTH_TOKEN` | Token to use during HTTPS authentication |
+| `--auth-token-username` | `AUTH_TOKEN_USERNAME` | Username to use during HTTPS authentication |
 | `--auth-key-path` | `AUTH_KEY_PATH` | Path to key to use during SSH authentication |
 | `--base-branch` | `BASE_BRANCH` | Base branch for merge request, will attempt to infer from well known CI systems variables |

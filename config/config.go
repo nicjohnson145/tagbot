@@ -10,14 +10,15 @@ import (
 )
 
 const (
-	Debug       = "debug"
-	Latest      = "latest"
-	AlwaysPatch = "always-patch"
-	RemoteName  = "remote-name"
-	AuthMethod  = "auth-method"
-	AuthToken   = "auth-token"
-	AuthKeyPath = "auth-key-path"
-	BaseBranch  = "base-branch"
+	Debug             = "debug"
+	Latest            = "latest"
+	AlwaysPatch       = "always-patch"
+	RemoteName        = "remote-name"
+	AuthMethod        = "auth-method"
+	AuthToken         = "auth-token"
+	AuthTokenUsername = "auth-token-username"
+	AuthKeyPath       = "auth-key-path"
+	BaseBranch        = "base-branch"
 )
 
 func InitializeConfig(cmd *cobra.Command) error {

@@ -14,12 +14,13 @@ func createTagbot() (*bot.Tagbot, error) {
 
 	// Initialize git repo
 	repo, err := git.NewGitRepo(git.Config{
-		Logger:      config.WithComponent(logger, "gitrepo"),
-		Path:        ".",
-		Remote:      viper.GetString(config.RemoteName),
-		AuthMethod:  viper.GetString(config.AuthMethod),
-		AuthToken:   viper.GetString(config.AuthToken),
-		AuthKeyPath: viper.GetString(config.AuthKeyPath),
+		Logger:            config.WithComponent(logger, "gitrepo"),
+		Path:              ".",
+		Remote:            viper.GetString(config.RemoteName),
+		AuthMethod:        viper.GetString(config.AuthMethod),
+		AuthToken:         viper.GetString(config.AuthToken),
+		AuthKeyPath:       viper.GetString(config.AuthKeyPath),
+		AuthTokenUsername: viper.GetString(config.AuthTokenUsername),
 	})
 	if err != nil {
 		logger.Err(err).Msg("initializing git repo")

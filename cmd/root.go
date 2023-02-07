@@ -28,6 +28,7 @@ func Root() *cobra.Command {
 	root.Flags().StringP(config.RemoteName, "r", "origin", "The remote name to push tags to")
 	root.Flags().StringP(config.AuthMethod, "a", "", "Override the auth method to use to push tags")
 	root.Flags().StringP(config.AuthToken, "t", "", "The auth token to use during token based auth")
+	root.Flags().StringP(config.AuthTokenUsername, "u", "TagBot", "The auth token to use during token based auth")
 	root.Flags().StringP(config.AuthKeyPath, "k", "", "Path to key to use during key based auth")
 
 	root.Flags().BoolP(config.AlwaysPatch, "p", false, "Increment patch version even if no version bump is required")

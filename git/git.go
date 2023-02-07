@@ -24,12 +24,13 @@ import (
 var errStopIteration = errors.New("stop iteration")
 
 type Config struct {
-	Logger      zerolog.Logger
-	Path        string
-	Remote      string
-	AuthMethod  string
-	AuthKeyPath string
-	AuthToken   string
+	Logger            zerolog.Logger
+	Path              string
+	Remote            string
+	AuthMethod        string
+	AuthKeyPath       string
+	AuthToken         string
+	AuthTokenUsername string
 }
 
 func NewGitRepo(config Config) (*GitRepo, error) {
@@ -285,7 +286,7 @@ func (g *GitRepo) sshAuth() (*ssh.PublicKeys, error) {
 }
 
 func (g *GitRepo) httpsAuth() (*http.BasicAuth, error) {
-	return &http.BasicAuth{Username: "TagBot", Password: g.config.AuthToken}, nil
+	return &http.BasicAuth{Username: g.config.AuthTokenUsername, Password: g.config.AuthToken}, nil
 }
 
 func (g *GitRepo) GetHashForBranch(branch string) (string, error) {
