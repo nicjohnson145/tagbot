@@ -35,6 +35,7 @@ func Root() *cobra.Command {
 	root.Flags().BoolP(config.Latest, "l", false, "Maintain a 'latest' tag")
 
 	root.AddCommand(
+		versionCmd(),
 		next(),
 		commitMsg(),
 		pullRequest(),

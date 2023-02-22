@@ -5,6 +5,8 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
+    ldflags:
+    - '-s -w -X github.com/nicjohnson145/tagbot/cmd.version={{.Version}} -X github.com/nicjohnson145/tagbot/cmd.date={{.Date}}'
     goos:
       - linux
       - windows
