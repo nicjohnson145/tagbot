@@ -104,3 +104,4 @@ Tagbot supports a number of options, either on the command line or through envir
 | `--auth-token-username` | `AUTH_TOKEN_USERNAME` | Username to use during HTTPS authentication |
 | `--auth-key-path` | `AUTH_KEY_PATH` | Path to key to use during SSH authentication |
 | `--base-branch` | `BASE_BRANCH` | Base branch for merge request, will attempt to infer from well known CI systems variables |
+| `--latest-name` | `LATEST_NAME` | Override the tag name when maintaining a latest tag |

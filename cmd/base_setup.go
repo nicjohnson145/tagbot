@@ -33,6 +33,7 @@ func createTagbot() (*bot.Tagbot, error) {
 		Repo:        repo,
 		AlwaysPatch: viper.GetBool(config.AlwaysPatch),
 		Latest:      viper.GetBool(config.Latest),
+		LatestName:  viper.GetString(config.LatestName),
 	})
 	return tagbot, nil
 }
