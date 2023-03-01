@@ -19,6 +19,7 @@ const (
 	AuthTokenUsername = "auth-token-username"
 	AuthKeyPath       = "auth-key-path"
 	BaseBranch        = "base-branch"
+	LatestName        = "latest-name"
 )
 
 func InitializeConfig(cmd *cobra.Command) error {
@@ -27,6 +28,7 @@ func InitializeConfig(cmd *cobra.Command) error {
 		return fmt.Errorf("error expanding home dir: %w", err)
 	}
 	viper.SetDefault(AuthKeyPath, path)
+	viper.SetDefault(LatestName, "latest")
 
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))

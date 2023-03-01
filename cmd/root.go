@@ -33,6 +33,7 @@ func Root() *cobra.Command {
 
 	root.Flags().BoolP(config.AlwaysPatch, "p", false, "Increment patch version even if no version bump is required")
 	root.Flags().BoolP(config.Latest, "l", false, "Maintain a 'latest' tag")
+	root.Flags().StringP(config.LatestName, "n", "", "Override latest tag name of 'latest'")
 
 	root.AddCommand(
 		versionCmd(),
