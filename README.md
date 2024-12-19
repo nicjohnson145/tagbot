@@ -105,3 +105,4 @@ Tagbot supports a number of options, either on the command line or through envir
 | `--auth-key-path` | `AUTH_KEY_PATH` | Path to key to use during SSH authentication |
 | `--base-branch` | `BASE_BRANCH` | Base branch for merge request, will attempt to infer from well known CI systems variables |
 | `--latest-name` | `LATEST_NAME` | Override the tag name when maintaining a latest tag |
+| `--no-prefix` | `NO_PREFIX` | Do not add the `v` prefix on created tags, i.e `1.3.2` instead of `v1.3.2` |
