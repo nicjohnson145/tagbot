@@ -139,6 +139,20 @@ func TestIncrement(t *testing.T) {
 		})
 		require.NoError(t, tagbot.Increment())
 	})
+
+	t.Run("no prefix", func(t *testing.T) {
+		repo := gitMock.NewRepo(t)
+		repo.EXPECT().LatestTag().Return(&git.Tag{Tag: semver.MustParse("v1.0.0"), Hash: hashStr}, nil)
+		repo.EXPECT().CommitsSinceHash(hashStr).Return(commitMessages, nil)
+		repo.EXPECT().MakeTagHead("1.1.0").Return(nil)
+		repo.EXPECT().PushTags().Return(nil)
+
+		tagbot := New(Config{
+			Repo:     repo,
+			NoPrefix: true,
+		})
+		require.NoError(t, tagbot.Increment())
+	})
 }
 
 func TestNext(t *testing.T) {

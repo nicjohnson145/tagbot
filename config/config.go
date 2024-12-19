@@ -20,6 +20,7 @@ const (
 	AuthKeyPath       = "auth-key-path"
 	BaseBranch        = "base-branch"
 	LatestName        = "latest-name"
+	NoPrefix          = "no-preix"
 )
 
 func InitializeConfig(cmd *cobra.Command) error {

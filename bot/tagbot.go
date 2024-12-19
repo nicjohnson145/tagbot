@@ -29,6 +29,7 @@ type Config struct {
 	Latest      bool
 	LatestName  string
 	Repo        git.Repo
+	NoPrefix    bool
 }
 
 func New(config Config) *Tagbot {
@@ -55,8 +56,10 @@ func (t *Tagbot) Increment() error {
 		return nil
 	}
 
-	t.log.Debug().Str("tag", version.Original()).Msg("starting tag creation")
-	if err := t.config.Repo.MakeTagHead(version.Original()); err != nil {
+	versionString := t.versionString(*version)
+
+	t.log.Debug().Str("tag", versionString).Msg("starting tag creation")
+	if err := t.config.Repo.MakeTagHead(versionString); err != nil {
 		t.log.Err(err).Msg("making new tag")
 		return fmt.Errorf("error making tag: %w", err)
 	}
@@ -65,7 +68,7 @@ func (t *Tagbot) Increment() error {
 		return fmt.Errorf("error pushing new tag: %w", err)
 	}
 
-	t.log.Info().Msgf("created tag %v", version.Original())
+	t.log.Info().Msgf("created tag %v", versionString)
 
 	if t.config.Latest {
 		t.log.Debug().Msgf("starting '%v' tag creation", t.config.LatestName)
@@ -96,7 +99,9 @@ func (t *Tagbot) Next() error {
 		return nil
 	}
 
-	t.log.Info().Str("tag", version.Original()).Msg("new tag required")
+	versionStr := t.versionString(*version)
+
+	t.log.Info().Str("tag", versionStr).Msg("new tag required")
 	return nil
 }
 
@@ -281,4 +286,11 @@ func (t *Tagbot) newTagForVersionBump(tag *semver.Version, bump VersionBump) *se
 	}
 
 	return &newTag
+}
+
+func (t *Tagbot) versionString(ver semver.Version) string {
+	if t.config.NoPrefix {
+		return ver.String()
+	}
+	return ver.Original()
 }

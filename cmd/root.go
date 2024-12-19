@@ -35,6 +35,8 @@ func Root() *cobra.Command {
 	root.Flags().BoolP(config.Latest, "l", false, "Maintain a 'latest' tag")
 	root.Flags().StringP(config.LatestName, "n", "", "Override latest tag name of 'latest'")
 
+	root.Flags().Bool(config.NoPrefix, false, "Do not add a 'v' prefix to tags")
+
 	root.AddCommand(
 		versionCmd(),
 		next(),
