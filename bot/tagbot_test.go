@@ -114,8 +114,9 @@ func TestIncrement(t *testing.T) {
 		repo.EXPECT().ForcePushTags().Return(nil)
 
 		tagbot := New(Config{
-			Repo:   repo,
-			Latest: true,
+			Repo:       repo,
+			Latest:     true,
+			LatestName: "latest",
 		})
 		require.NoError(t, tagbot.Increment())
 	})
