@@ -35,6 +35,7 @@ jobs:
       env:
         AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
 ### Note about triggering other workflows
 
 The default `${{ secrets.GITHUB_TOKEN }}` [can't create additional workflows](https://github.com/orgs/community/discussions/27028#discussioncomment-3254360).
@@ -67,42 +68,48 @@ git config --add tagbot.disable true
 
 in any repo that you wish tagbots `commit-msg` hook not to run
 
-# Running on pull requests
-
-Tagbot can retroactively validate commit messages on pull requests (if not everyone uses the
-commit-msg hook). This can be accomplished with the following github action
-```yaml
-on:
-  pull_request
-
-jobs:
-  check-commits:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: TagBot
-      uses: nicjohnson145/tagbot@latest
-      args:
-      - pull-request
-
-```
 # Options
 
-Tagbot supports a number of options, either on the command line or through environment variables
+Tagbot supports a number of options, which can be set in various methods detailed below
 
-| Command Line | Environment | Use |
-| ------------ | ----------- | --- |
-| `--debug` | `DEBUG` | Enable debug logging |
-| `--latest` | `LATEST` | Maintain a `latest` tag in addition to the SemVer tags |
-| `--always-patch` | `ALWAYS_PATCH` | If the run were to result in no tag being created, instead create a tag with a patch version bump|
-| `--remote-name` | `REMOTE_NAME` | Name of the remote to push tags to, defaults to `origin` |
-| `--auth-method` | `AUTH_METHOD` | What method to use to auth, defaults to clone method of remote |
-| `--auth-token` | `AUTH_TOKEN` | Token to use during HTTPS authentication |
-| `--auth-token-username` | `AUTH_TOKEN_USERNAME` | Username to use during HTTPS authentication |
-| `--auth-key-path` | `AUTH_KEY_PATH` | Path to key to use during SSH authentication |
-| `--base-branch` | `BASE_BRANCH` | Base branch for merge request, will attempt to infer from well known CI systems variables |
-| `--latest-name` | `LATEST_NAME` | Override the tag name when maintaining a latest tag |
-| `--no-prefix` | `NO_PREFIX` | Do not add the `v` prefix on created tags, i.e `1.3.2` instead of `v1.3.2` |
+| Command Line | Environment Variable | Monorepo Config | Use |
+| ------------ | -------------------- | --------------- | --- |
+| `--log-level` | `LOG_LEVEL` | _not applicable_ | Set the logging verbosity |
+| `--remote-name` | `REMOTE_NAME` | _not applicable_ | Override the remote tags will be pushed to |
+| `--auth-method` | `AUTH_METHOD` | _not applicable_ | What method to use to auth, defaults to clone method of remote |
+| `--auth-token` | `AUTH_TOKEN` | _not applicable_ |  Token to use during HTTPS authentication |
+| `--auth-token-username` | `AUTH_TOKEN_USERNAME` | _not applicable_ |  Username to use during HTTPS authentication |
+| `--auth-key-path` | `AUTH_KEY_PATH` | _not applicable_ |  Path to key to use during SSH authentication |
+| `--monorepo` | `MONOREPO` | _not applicable_ | Execute tagbot in monorepo mode, maintaining multiple tags |
+| `--monorepo-config-path` | `MONOREPO_CONFIG_PATH` | _not applicable_ | Override the default configuration file path |
+| `--maintain-latest` | `MAINTAIN_LATEST` | `maintain-latest` | Indicates a "latest" tag should be maintained in addition to semver |
+| `--latest-name` | `LATEST_NAME` | `latest-name` | Override the name of the "latest" tag, if maintained |
+| `--no-v` | `NO_V` | `no-v` | Do not add a `v` prefix to tags |
+| `--always-patch` | `ALWAYS_PATCH` | `always-patch` | If a commit were to trigger no tag being made, instead create a patch tag. Note: in monorepo mode, a commit must be _relevant_ to a component for this behavior to trigger |
+
+# MonoRepos
+
+Tagbot supports multiple "projects" within a single git repository. Each one can be tagged independently. This behavior
+is controlled via 2 pieces of configuration: the monorepo flag, and the monorepo configuration file (default location of
+`.tagbot.yaml` at repo root). Components are defined manually, with the changeset globs functioning to gate which
+changed files should correspond to which components. Configuration supplied via the environment or command line flags
+for certain settings set the "default" for all components, namely: `--maintain-latest`, `--latest-name`, `--no-v`, &
+`--always-patch`. If these settings are set, and a component does not override them, the value passed there will be
+used. See below for an example configuration:
+
+```yaml
+components:
+  foo:
+    change-set-globs:
+    - src/pkg/foo/*
+    - package.json
+  bar:
+    change-set-globs:
+    - src/pkg/bar/*
+    - package.json
+    - src/libs/barlib/*
+    maintain-latest: true
+    latest-name: main
+    no-v: true
+    always-patch: true
+```

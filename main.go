@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/nicjohnson145/tagbot/cmd"
-	"github.com/rs/zerolog/log"
+	"os"
+
+	"github.com/nicjohnson145/tagbot/internal/cmd"
 )
 
 func main() {
 	if err := cmd.Root().Execute(); err != nil {
-		log.Fatal().Msg(err.Error())
+		// root command takes care of logging
+		os.Exit(1)
 	}
 }
