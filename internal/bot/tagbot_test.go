@@ -260,7 +260,7 @@ func TestRun(t *testing.T) {
 			t,
 			testCommit{
 				Message: "im a message",
-				Tag: "v0.1.0",
+				Tag:     "v0.1.0",
 				Files: []string{
 					"bar/qux.txt",
 				},
@@ -299,4 +299,64 @@ func TestRun(t *testing.T) {
 		require.NoError(t, bot.Run(newCtxWithLog(t)))
 		mustHaveTags(t, repo, []string{"v0.1.0", "foo/v0.0.1"})
 	})
+}
+
+func TestCommitRelevantToComponent(t *testing.T) {
+	t.Parallel()
+
+	testData := []struct {
+		name       string
+		changeSets []string
+		files      []string
+		expected   bool
+	}{
+		{
+			name: "anything",
+			changeSets: []string{
+				"*",
+			},
+			files: []string{
+				"internal/bot/version.go",
+			},
+			expected: true,
+		},
+		{
+			name: "subdir - no match",
+			changeSets: []string{
+				"foo/*",
+			},
+			files: []string{
+				"internal/bot/version.go",
+			},
+			expected: false,
+		},
+		{
+			name: "subdir - yes match",
+			changeSets: []string{
+				"internal/*",
+			},
+			files: []string{
+				"internal/bot/version.go",
+			},
+			expected: false,
+		},
+	}
+	for _, tc := range testData {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			bot := &Tagbot{}
+
+			got, err := bot.commitRelevantToComponent(
+				&config.MonoRepoComponent{
+					ChangeSetGlobs: tc.changeSets,
+				},
+				&Commit{
+					Files: tc.files,
+				},
+			)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, got)
+		})
+	}
 }

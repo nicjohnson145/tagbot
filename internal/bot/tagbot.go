@@ -196,6 +196,11 @@ func (t *Tagbot) processCommit(ctx context.Context, component *config.MonoRepoCo
 func (t *Tagbot) commitRelevantToComponent(component *config.MonoRepoComponent, commit *Commit) (bool, error) {
 	for _, file := range commit.Files {
 		for _, glob := range component.ChangeSetGlobs {
+			// For some reason, a bare splat doesnt work like I would expect, so special case it
+			if glob == "*" {
+				return true, nil
+			}
+
 			match, err := filepath.Match(glob, file)
 			if err != nil {
 				return false, fmt.Errorf("error checking glob match: %w", err)
