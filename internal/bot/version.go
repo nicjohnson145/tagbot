@@ -50,7 +50,7 @@ var prefixMap = map[string]VersionBump{
 	"ci":       VersionBumpNone,
 }
 
-var messagesRegex = regexp.MustCompile(fmt.Sprintf(`(?i)^(?P<prefix>%v)(?P<breaking>!?): .*`, strings.Join(hlp.Keys(prefixMap), "|")))
+var messagesRegex = regexp.MustCompile(fmt.Sprintf(`(?i)^(?P<prefix>%v)(\(.*\))?(?P<breaking>!?): .*`, strings.Join(hlp.Keys(prefixMap), "|")))
 
 func VersionBumpFromCommitMessage(ctx context.Context, message string) VersionBump {
 	bump, _ := EnsureValidCommitMessage(ctx, message)

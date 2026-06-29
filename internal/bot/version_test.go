@@ -75,6 +75,20 @@ func TestVersionBumpFromCommitMessage(t *testing.T) {
 			`[1:]),
 			expected: VersionBumpMajor,
 		},
+		{
+			name: "sub type",
+			message: dedent.Dedent(`
+				fix(ci): correct go version
+			`[1:]),
+			expected: VersionBumpPatch,
+		},
+		{
+			name: "sub type breaking",
+			message: dedent.Dedent(`
+				feat(api)!: breaking api feature
+			`[1:]),
+			expected: VersionBumpMajor,
+		},
 	}
 	for _, tc := range testData {
 		t.Run(tc.name, func(t *testing.T) {
