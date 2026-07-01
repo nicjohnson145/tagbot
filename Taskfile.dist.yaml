@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  validate:
+    desc: run tests & static analysis
+    cmds:
+    - golangci-lint run
+    - gotestsum
