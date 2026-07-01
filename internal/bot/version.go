@@ -25,6 +25,7 @@ var (
 
 /*
 ENUM(
+irrelevant
 none
 patch
 minor

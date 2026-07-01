@@ -224,6 +224,61 @@ func TestRun(t *testing.T) {
 		})
 	})
 
+	t.Run("monorepo always patch", func(t *testing.T) {
+		repo := newMemoryRepo(
+			t,
+			testCommit{
+				Message: "fix: fix a thing",
+				Tag:     "bar/v0.1.0",
+				Files: []string{
+					"bar/qux.txt",
+				},
+			},
+			testCommit{
+				Message: "feat: do a thing",
+				Tag:     "foo/v0.1.0",
+				Files: []string{
+					"foo/bar.txt",
+				},
+			},
+			testCommit{
+				Message: "do a thing",
+				Files: []string{
+					"foo/other.txt",
+				},
+			},
+		)
+		bot := NewTagbot(TagbotConfig{
+			MonorepoConfig: &config.MonoRepoConfig{
+				Components: map[string]config.MonoRepoComponent{
+					"foo": {
+						Name:           "foo",
+						ChangeSetGlobs: []string{"foo/*"},
+						MaintainLatest: hlp.Ptr(false),
+						LatestName:     hlp.Ptr("latest"),
+						NoV:            hlp.Ptr(false),
+						AlwaysPatch:    hlp.Ptr(true),
+					},
+					"bar": {
+						Name:           "bar",
+						ChangeSetGlobs: []string{"bar/*"},
+						MaintainLatest: hlp.Ptr(false),
+						LatestName:     hlp.Ptr("latest"),
+						NoV:            hlp.Ptr(false),
+						AlwaysPatch:    hlp.Ptr(true),
+					},
+				},
+			},
+			Repo: repo,
+		})
+		require.NoError(t, bot.Run(newCtxWithLog(t)))
+		mustHaveTags(t, repo, []string{
+			"foo/v0.1.0",
+			"foo/v0.1.1",
+			"bar/v0.1.0",
+		})
+	})
+
 	t.Run("non monorepo, empty", func(t *testing.T) {
 		repo := newMemoryRepo(
 			t,

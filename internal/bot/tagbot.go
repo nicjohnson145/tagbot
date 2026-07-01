@@ -67,7 +67,7 @@ func (t *Tagbot) Run(ctx context.Context) error {
 		} else {
 			log.Debug().Msg("no tag found")
 		}
-		bump := VersionBumpNone
+		bump := VersionBumpIrrelevant
 		if mostRecent != nil { // standard loop if we find an existing tag
 			err = t.repo.ProcessCommitsUntil(ctx, mostRecent.Hash, func(ctx context.Context, commit *Commit) (bool, error) {
 				commitBump, err := t.processCommit(ctx, &component, commit)
@@ -83,7 +83,7 @@ func (t *Tagbot) Run(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("error iterating commits: %w", err)
 			}
-			if VersionBumpPatch.Greater(bump) && component.AlwaysPatch != nil && *component.AlwaysPatch {
+			if bump != VersionBumpIrrelevant && VersionBumpPatch.Greater(bump) && component.AlwaysPatch != nil && *component.AlwaysPatch {
 				bump = VersionBumpPatch
 			}
 		} else {
@@ -187,7 +187,7 @@ func (t *Tagbot) processCommit(ctx context.Context, component *config.MonoRepoCo
 
 	if !relevant {
 		log.Trace().Msg("commit determined not relevant to this component")
-		return VersionBumpNone, nil
+		return VersionBumpIrrelevant, nil
 	}
 
 	return VersionBumpFromCommitMessage(ctx, commit.Message), nil

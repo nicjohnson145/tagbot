@@ -12,8 +12,10 @@ import (
 )
 
 const (
+	// VersionBumpIrrelevant is a VersionBump of type Irrelevant.
+	VersionBumpIrrelevant VersionBump = iota
 	// VersionBumpNone is a VersionBump of type None.
-	VersionBumpNone VersionBump = iota
+	VersionBumpNone
 	// VersionBumpPatch is a VersionBump of type Patch.
 	VersionBumpPatch
 	// VersionBumpMinor is a VersionBump of type Minor.
@@ -24,13 +26,14 @@ const (
 
 var ErrInvalidVersionBump = fmt.Errorf("not a valid VersionBump, try [%s]", strings.Join(_VersionBumpNames, ", "))
 
-const _VersionBumpName = "nonepatchminormajor"
+const _VersionBumpName = "irrelevantnonepatchminormajor"
 
 var _VersionBumpNames = []string{
-	_VersionBumpName[0:4],
-	_VersionBumpName[4:9],
-	_VersionBumpName[9:14],
+	_VersionBumpName[0:10],
+	_VersionBumpName[10:14],
 	_VersionBumpName[14:19],
+	_VersionBumpName[19:24],
+	_VersionBumpName[24:29],
 }
 
 // VersionBumpNames returns a list of possible string values of VersionBump.
@@ -41,10 +44,11 @@ func VersionBumpNames() []string {
 }
 
 var _VersionBumpMap = map[VersionBump]string{
-	VersionBumpNone:  _VersionBumpName[0:4],
-	VersionBumpPatch: _VersionBumpName[4:9],
-	VersionBumpMinor: _VersionBumpName[9:14],
-	VersionBumpMajor: _VersionBumpName[14:19],
+	VersionBumpIrrelevant: _VersionBumpName[0:10],
+	VersionBumpNone:       _VersionBumpName[10:14],
+	VersionBumpPatch:      _VersionBumpName[14:19],
+	VersionBumpMinor:      _VersionBumpName[19:24],
+	VersionBumpMajor:      _VersionBumpName[24:29],
 }
 
 // String implements the Stringer interface.
@@ -63,10 +67,11 @@ func (x VersionBump) IsValid() bool {
 }
 
 var _VersionBumpValue = map[string]VersionBump{
-	_VersionBumpName[0:4]:   VersionBumpNone,
-	_VersionBumpName[4:9]:   VersionBumpPatch,
-	_VersionBumpName[9:14]:  VersionBumpMinor,
-	_VersionBumpName[14:19]: VersionBumpMajor,
+	_VersionBumpName[0:10]:  VersionBumpIrrelevant,
+	_VersionBumpName[10:14]: VersionBumpNone,
+	_VersionBumpName[14:19]: VersionBumpPatch,
+	_VersionBumpName[19:24]: VersionBumpMinor,
+	_VersionBumpName[24:29]: VersionBumpMajor,
 }
 
 // ParseVersionBump attempts to convert a string to a VersionBump.
