@@ -360,40 +360,46 @@ func TestCommitRelevantToComponent(t *testing.T) {
 	t.Parallel()
 
 	testData := []struct {
-		name       string
-		changeSets []string
-		files      []string
-		expected   bool
+		name     string
+		pattern  string
+		file     string
+		expected bool
 	}{
 		{
-			name: "anything",
-			changeSets: []string{
-				"*",
-			},
-			files: []string{
-				"internal/bot/version.go",
-			},
+			name:     "anything",
+			pattern:  "**/*",
+			file:     "internal/bot/version.go",
 			expected: true,
 		},
 		{
-			name: "subdir - no match",
-			changeSets: []string{
-				"foo/*",
-			},
-			files: []string{
-				"internal/bot/version.go",
-			},
+			name:     "top level file",
+			pattern:  "**/*",
+			file:     "version.go",
+			expected: true,
+		},
+		{
+			name:     "subdir - no match",
+			pattern:  "foo/*",
+			file:     "internal/bot/version.go",
 			expected: false,
 		},
 		{
-			name: "subdir - yes match",
-			changeSets: []string{
-				"internal/*",
-			},
-			files: []string{
-				"internal/bot/version.go",
-			},
+			name:     "subdir multiglob - no match",
+			pattern:  "foo/**/*",
+			file:     "internal/foo/version.go",
 			expected: false,
+		},
+		{
+			name:     "subdir - yes match",
+			pattern:  "internal/**/*",
+			file:     "internal/bot/subdir/version.go",
+			expected: true,
+		},
+		{
+			name:     "multiglob top level",
+			pattern:  "internal/**/*",
+			file:     "internal/version.go",
+			expected: true,
 		},
 	}
 	for _, tc := range testData {
@@ -404,10 +410,14 @@ func TestCommitRelevantToComponent(t *testing.T) {
 
 			got, err := bot.commitRelevantToComponent(
 				&config.MonoRepoComponent{
-					ChangeSetGlobs: tc.changeSets,
+					ChangeSetGlobs: []string{
+						tc.pattern,
+					},
 				},
 				&Commit{
-					Files: tc.files,
+					Files: []string{
+						tc.file,
+					},
 				},
 			)
 			require.NoError(t, err)

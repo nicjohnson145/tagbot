@@ -36,7 +36,7 @@ func Root() *cobra.Command {
 					Components: map[string]config.MonoRepoComponent{
 						"core": {
 							Name:           "core",
-							ChangeSetGlobs: []string{"*"},
+							ChangeSetGlobs: []string{"**/*"},
 							Prefix:         hlp.Ptr(""),
 							MaintainLatest: hlp.Ptr(viper.GetBool(config.MaintainLatest)),
 							LatestName:     hlp.Ptr(viper.GetString(config.LatestName)),
