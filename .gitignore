@@ -16,3 +16,7 @@
 
 # Ignore the binary
 tagbot
+
+# ignore user-defined taskfiles
+Taskfile.yaml
+Taskfile.yml
