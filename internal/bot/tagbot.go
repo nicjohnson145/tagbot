@@ -143,6 +143,7 @@ func (t *Tagbot) Run(ctx context.Context) error {
 	}
 
 	// now that we've got all our bumps, walk them again and do our "always patch" logic, log, and make our tags
+	tagMade := false
 	for _, key := range keys {
 		bump := bumpMap[key]
 		component := t.monorepoConfig.Components[key]
@@ -181,6 +182,7 @@ func (t *Tagbot) Run(ctx context.Context) error {
 			if t.dryRun {
 				log.Info().Msgf("DRYRUN: would create %v", wantTags)
 			} else {
+				tagMade = true
 				log.Info().Msgf("creating %v", wantTags)
 				if err := t.repo.MakeTagsAtHead(ctx, wantTags...); err != nil {
 					return fmt.Errorf("error creating tag: %w", err)
@@ -189,13 +191,17 @@ func (t *Tagbot) Run(ctx context.Context) error {
 		}
 	}
 
-	if t.dryRun {
-		log.Info().Msg("DRYRUN: would push tags")
-	} else {
-		log.Info().Msgf("pushing tags")
-		if err := t.repo.PushTags(ctx); err != nil {
-			return fmt.Errorf("error pushing tags: %w", err)
+	if tagMade {
+		if t.dryRun {
+			log.Info().Msg("DRYRUN: would push tags")
+		} else {
+			log.Info().Msgf("pushing tags")
+			if err := t.repo.PushTags(ctx); err != nil {
+				return fmt.Errorf("error pushing tags: %w", err)
+			}
 		}
+	} else {
+		log.Info().Msg("no tags made, nothing to push")
 	}
 
 	return nil

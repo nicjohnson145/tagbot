@@ -29,6 +29,8 @@ type unitTestRepo struct {
 	IRepo
 	repo *gogit.Repository
 	fs   billy.Filesystem
+
+	pushCalled bool
 }
 
 func (u *unitTestRepo) MakeCommits(t *testing.T, commits ...testCommit) []plumbing.Hash {
@@ -38,6 +40,7 @@ func (u *unitTestRepo) MakeCommits(t *testing.T, commits ...testCommit) []plumbi
 }
 
 func (u *unitTestRepo) PushTags(ctx context.Context) error {
+	u.pushCalled = true
 	return nil
 }
 

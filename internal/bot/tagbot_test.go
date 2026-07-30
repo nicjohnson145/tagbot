@@ -318,6 +318,45 @@ func TestRun(t *testing.T) {
 		require.NoError(t, bot.Run(newCtxWithLog(t)))
 		mustHaveTags(t, repo, []string{"foo/v0.1.0", "foo/v0.1.1", "bar/v0.2.0", "bar/v0.2.1"})
 	})
+
+	t.Run("no push if no tags made", func(t *testing.T) {
+		repo := newMemoryRepo(
+			t,
+			testCommit{
+				Message: "feat: foo change",
+				Tags:    []string{"foo/v0.1.0"},
+				Files: []string{
+					"foo",
+				},
+			},
+			testCommit{
+				Message: "docs: quiet change",
+				Files: []string{
+					"foo",
+				},
+			},
+		)
+
+		bot := NewTagbot(TagbotConfig{
+			MonorepoConfig: &config.MonoRepoConfig{
+				Components: map[string]config.MonoRepoComponent{
+					"foo": {
+						Name:           "foo",
+						ChangeSetGlobs: []string{"foo"},
+						MaintainLatest: hlp.Ptr(false),
+						LatestName:     hlp.Ptr("latest"),
+						NoV:            hlp.Ptr(false),
+						AlwaysPatch:    hlp.Ptr(false),
+					},
+				},
+			},
+			Repo: repo,
+		})
+
+		require.NoError(t, bot.Run(newCtxWithLog(t)))
+		mustHaveTags(t, repo, []string{"foo/v0.1.0"})
+		require.False(t, repo.pushCalled)
+	})
 }
 
 func TestCommitRelevantToComponent(t *testing.T) {
