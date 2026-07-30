@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nicjohnson145/hlp/set"
 	"github.com/Masterminds/semver"
 	gogit "github.com/go-git/go-git/v5"
 	gogitconfig "github.com/go-git/go-git/v5/config"
@@ -18,6 +17,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/go-git/go-git/v5/utils/merkletrie"
+	"github.com/go-git/go-git/v5/utils/merkletrie/noder"
 	"github.com/nicjohnson145/tagbot/internal/config"
 	"github.com/rs/zerolog"
 )
@@ -216,8 +217,9 @@ func (g *GitRepo) constructTagsByPrefixMap(ctx context.Context) error {
 		}
 
 		tagList = append(tagList, Tag{
-			Tag:  ver,
-			Hash: hash.String(),
+			TagName: tagName,
+			Tag:     ver,
+			Hash:    hash.String(),
 		})
 		tagMap[prefix] = tagList
 
@@ -246,21 +248,10 @@ func (g *GitRepo) constructTagsByPrefixMap(ctx context.Context) error {
 type CommitProcessFunc func(ctx context.Context, commit *Commit) (bool, error)
 
 type Commit struct {
-	Hash    string
-	Message string
-	Files   []string
-}
-
-func (g *GitRepo) ProcessCommitsUntil(ctx context.Context, hashStr string, processFunc CommitProcessFunc) error {
-	hash := plumbing.NewHash(hashStr)
-
-	return g.processLogWhere(
-		ctx,
-		func(commit *object.Commit) bool {
-			return bytes.Equal(commit.Hash[:], hash[:])
-		},
-		processFunc,
-	)
+	Hash      string
+	ShortHash string
+	Message   string
+	Files     []string
 }
 
 func (g *GitRepo) MakeTagsAtHead(ctx context.Context, tags ...string) error {
@@ -303,19 +294,7 @@ func (g *GitRepo) PushTags(ctx context.Context) error {
 	return nil
 }
 
-func (g *GitRepo) ProcessLatestCommit(ctx context.Context, processFunc CommitProcessFunc) error {
-	count := 0
-	return g.processLogWhere(
-		ctx,
-		func(commit *object.Commit) bool {
-			count += 1
-			return count > 1
-		},
-		processFunc,
-	)
-}
-
-func (g *GitRepo) processLogWhere(ctx context.Context, stopFunc func(commit *object.Commit) bool, processFunc CommitProcessFunc) error {
+func (g *GitRepo) ProcessLogWhere(ctx context.Context, stopFunc func(commit *object.Commit) bool, processFunc CommitProcessFunc) error {
 	iter, err := g.repo.Log(&gogit.LogOptions{
 		Order: gogit.LogOrderCommitterTime,
 	})
@@ -328,53 +307,16 @@ func (g *GitRepo) processLogWhere(ctx context.Context, stopFunc func(commit *obj
 		if stopFunc(commit) {
 			return stopIterationErr
 		}
-
-		files := []string{}
-		// "WTF is this?!"
-		// So apparently https://github.com/go-git/go-git/issues/307 is like...how this is supposed to work? which is
-		// insane to me. But mirror
-		// https://github.com/metio/terraform-provider-git/commit/fbedb640bc03c4d3ebda8ab75653d18dc1d32277 by chekcing
-		// if the commit has any parents, and then doing doing the patch thing, otherwise if the commit is the only
-		// commit in the repo then by definition the whole repos files are what it touched
-		if len(commit.ParentHashes) > 0 {
-			parent, err := commit.Parent(0)
-			if err != nil {
-				return fmt.Errorf("error getting parent: %w", err)
-			}
-			patch, err := parent.Patch(commit)
-			if err != nil  {
-				return fmt.Errorf("error constructing patch: %w", err)
-			}
-			seen := set.New[string]()
-			for _, diff := range patch.FilePatches() {
-				from, to := diff.Files()
-				if from != nil {
-					seen.Add(from.Path())
-				}
-				if to != nil {
-					seen.Add(to.Path())
-				}
-			}
-			files = seen.AsSlice()
-
-		} else {
-			fileIter, err := commit.Files()
-			if err != nil {
-				return fmt.Errorf("error creating file iter: %w", err)
-			}
-			err = fileIter.ForEach(func(f *object.File) error {
-				files = append(files, f.Name)
-				return nil
-			})
-			if err != nil {
-				return fmt.Errorf("error iterating files: %w", err)
-			}
+		files, err := g.getFilesForCommit(commit)
+		if err != nil {
+			return fmt.Errorf("error getting files: %w", err)
 		}
 
 		c := &Commit{
-			Hash:    commit.Hash.String()[:10],
-			Message: commit.Message,
-			Files:   files,
+			Hash:      commit.Hash.String(),
+			ShortHash: commit.Hash.String()[:10],
+			Message:   commit.Message,
+			Files:     files,
 		}
 
 		shouldContinue, err := processFunc(ctx, c)
@@ -394,6 +336,69 @@ func (g *GitRepo) processLogWhere(ctx context.Context, stopFunc func(commit *obj
 		return fmt.Errorf("error iterating commits: %w", err)
 	}
 	return nil
+}
+
+func (g *GitRepo) getFilesForCommit(commit *object.Commit) ([]string, error) {
+	// "WTF is this?!"
+	// So apparently https://github.com/go-git/go-git/issues/307 is like...how this is supposed to work? which is
+	// insane to me.
+	// https://github.com/metio/terraform-provider-git/commit/fbedb640bc03c4d3ebda8ab75653d18dc1d32277 introduced
+	// the idea of computing patches, but the default version tried to also get patch _content_, which for commits
+	// that had a large number of files, or large files (cough PF gamp-config), it would balloon memory like crazy.
+	// We dont actually need the file content, only the changed file paths and the message. So this is basically the guts
+	// of `patch.FilePatches().Files()` but with the content gathering ripped out.
+	files := []string{}
+
+	if commit.NumParents() == 0 {
+		fileIter, err := commit.Files()
+		if err != nil {
+			return nil, fmt.Errorf("error creating file iter: %w", err)
+		}
+		err = fileIter.ForEach(func(f *object.File) error {
+			files = append(files, f.Name)
+			return nil
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error iterating files: %w", err)
+		}
+		return files, nil
+	}
+
+	parent, err := commit.Parent(0)
+	if err != nil {
+		return nil, fmt.Errorf("error getting parent: %w", err)
+	}
+
+	parentTree, err := parent.Tree()
+	if err != nil {
+		return nil, fmt.Errorf("error getting parent tree: %w", err)
+	}
+	commitTree, err := commit.Tree()
+	if err != nil {
+		return nil, fmt.Errorf("error getting commit tree: %w", err)
+	}
+
+	parentObj := object.NewTreeRootNode(parentTree)
+	commitObj := object.NewTreeRootNode(commitTree)
+
+	hashEqual := func(a, b noder.Hasher) bool {
+		return bytes.Equal(a.Hash(), b.Hash())
+	}
+
+	changes, err := merkletrie.DiffTree(parentObj, commitObj, hashEqual)
+	if err != nil {
+		return nil, fmt.Errorf("error computing diff: %w", err)
+	}
+
+	for _, c := range changes {
+		if c.From != nil {
+			files = append(files, c.From.String())
+		} else if c.To != nil {
+			files = append(files, c.To.String())
+		}
+	}
+
+	return files, nil
 }
 
 func (g *GitRepo) IsTagbotDisabled() (bool, error) {

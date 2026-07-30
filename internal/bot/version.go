@@ -69,7 +69,7 @@ func EnsureValidCommitMessage(ctx context.Context, message string) (VersionBump,
 	// Otherwise try to match it up
 	parts := hlp.ExtractNamedMatches(messagesRegex, messagesRegex.FindStringSubmatch(message))
 	if len(parts) == 0 {
-		log.Trace().Msgf("commit message '%v' does not conform to regex, marking as no bump", message)
+		log.Trace().Msgf("commit message '%v' does not conform to regex, marking as no bump", strings.ReplaceAll(message, "\n", `\n`))
 		return VersionBumpNone, ErrInvalidMessageError
 	}
 

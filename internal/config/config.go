@@ -50,7 +50,7 @@ const (
 var (
 	DefaultLogLevel = LoggingLevelInfo.String()
 
-	DefaultRemoteName = "origin"
+	DefaultRemoteName        = "origin"
 	DefaultAuthTokenUsername = "TagBot"
 
 	DefaultMonoRepo           = false
