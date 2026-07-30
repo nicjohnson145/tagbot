@@ -86,6 +86,7 @@ Tagbot supports a number of options, which can be set in various methods detaile
 | `--latest-name` | `LATEST_NAME` | `latest-name` | Override the name of the "latest" tag, if maintained |
 | `--no-v` | `NO_V` | `no-v` | Do not add a `v` prefix to tags |
 | `--always-patch` | `ALWAYS_PATCH` | `always-patch` | If a commit were to trigger no tag being made, instead create a patch tag. Note: in monorepo mode, a commit must be _relevant_ to a component for this behavior to trigger |
+| `--dry-run` | `DRY_RUN` | _not applicable_ | Do not actually make or push any tags, run in an informational mode |
 
 # MonoRepos
 
