@@ -64,6 +64,7 @@ func Root() *cobra.Command {
 			tagbot := bot.NewTagbot(bot.TagbotConfig{
 				MonorepoConfig: monorepoConf,
 				Repo:           repo,
+				DryRun:         viper.GetBool(config.DryRun),
 			})
 
 			// Embed our logger in a context so we can send it around
@@ -94,6 +95,8 @@ func Root() *cobra.Command {
 	cmd.Flags().String(config.LatestName, config.DefaultLatestName, "Name of latest, if maintained. Applied to all non-overriden components in monorepo mode")
 	cmd.Flags().Bool(config.NoV, config.DefaultNoV, "Do not include the 'v' prefix on created tags. Applied to all non-overriden components in monorepo mode")
 	cmd.Flags().Bool(config.AlwaysPatch, config.DefaultAlwaysPatch, "If commits would result in no version bump, instead patch. Applied to all non-overriden components in monorepo mode")
+
+	cmd.Flags().Bool(config.DryRun, config.DefaultDryRun, "Do not actually make or push any tags, only log what would be done")
 
 	cmd.AddCommand(CommitMessage())
 

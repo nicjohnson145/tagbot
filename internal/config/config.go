@@ -43,6 +43,8 @@ const (
 	LatestName     = "latest-name"
 	NoV            = "no-v"
 	AlwaysPatch    = "always-patch"
+
+	DryRun = "dry-run"
 )
 
 var (
@@ -58,6 +60,8 @@ var (
 	DefaultLatestName     = "latest"
 	DefaultNoV            = false
 	DefaultAlwaysPatch    = false
+
+	DefaultDryRun = false
 )
 
 func InitConfig(cmd *cobra.Command) error {
@@ -101,6 +105,8 @@ func InitConfig(cmd *cobra.Command) error {
 	viper.SetDefault(LatestName, DefaultLatestName)
 	viper.SetDefault(NoV, DefaultNoV)
 	viper.SetDefault(AlwaysPatch, DefaultAlwaysPatch)
+
+	viper.SetDefault(DryRun, DefaultDryRun)
 
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))

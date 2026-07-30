@@ -6,27 +6,30 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver"
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/nicjohnson145/hlp"
 	"github.com/nicjohnson145/tagbot/internal/config"
 	"github.com/rs/zerolog"
-	"github.com/bmatcuk/doublestar/v4"
 )
 
 type TagbotConfig struct {
 	MonorepoConfig *config.MonoRepoConfig
 	Repo           IRepo
+	DryRun         bool
 }
 
 func NewTagbot(conf TagbotConfig) *Tagbot {
 	return &Tagbot{
 		monorepoConfig: conf.MonorepoConfig,
 		repo:           conf.Repo,
+		dryRun:         conf.DryRun,
 	}
 }
 
 type Tagbot struct {
 	monorepoConfig *config.MonoRepoConfig
 	repo           IRepo
+	dryRun         bool
 }
 
 func (t *Tagbot) Run(ctx context.Context) error {
@@ -162,15 +165,23 @@ func (t *Tagbot) Run(ctx context.Context) error {
 			wantTags = append(wantTags, makeLatest(up.Component))
 		}
 
-		log.Info().Msgf("creating %v", wantTags)
-		if err := t.repo.MakeTagsAtHead(ctx, wantTags...); err != nil {
-			return fmt.Errorf("error creating tag: %w", err)
+		if t.dryRun {
+			log.Info().Msgf("DRYRUN: would create %v", wantTags)
+		} else {
+			log.Info().Msgf("creating %v", wantTags)
+			if err := t.repo.MakeTagsAtHead(ctx, wantTags...); err != nil {
+				return fmt.Errorf("error creating tag: %w", err)
+			}
 		}
 	}
 
-	log.Info().Msgf("pushing tags")
-	if err := t.repo.PushTags(ctx); err != nil {
-		return fmt.Errorf("error pushing tags: %w", err)
+	if t.dryRun {
+		log.Info().Msg("DRYRUN: would push tags")
+	} else {
+		log.Info().Msg("pushing tags")
+		if err := t.repo.PushTags(ctx); err != nil {
+			return fmt.Errorf("error pushing tags: %w", err)
+		}
 	}
 
 	return nil
